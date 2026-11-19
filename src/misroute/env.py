@@ -24,7 +24,7 @@ def load_dotenv(path: str | Path = REPO_ROOT / ".env") -> dict[str, str]:
         if val[:1] in "\"'" and val[:1] and val[:1] in val[1:]:      # quoted: keep everything inside
             val = val[1:].split(val[0], 1)[0]
         else:                                                    # unquoted: drop "  # comment"
-            val = re.split(r"\s+#", val, maxsplit=1)[0].strip()
+            val = re.split(r"(?:^|\s+)#", val, maxsplit=1)[0].strip()
         if key and val and key not in os.environ:
             os.environ[key] = val
             loaded[key] = val

@@ -19,7 +19,7 @@ def parse(path: Path) -> dict[str, str]:
             m = LINE.match(line)
             if m and not line.lstrip().startswith("#"):
                 v = m.group(3).strip()
-                v = v if v[:1] in "\"'" else re.split(r"\s+#", v, maxsplit=1)[0].strip()
+                v = v if v[:1] in "\"'" else re.split(r"(?:^|\s+)#", v, maxsplit=1)[0].strip()
                 if v:
                     vals[m.group(2)] = v
     return vals

@@ -126,3 +126,11 @@ def test_out_of_card_call_is_blocked_and_flagged(hub):
     strict = ToolCallDetector(flag_no_calls=True).detect(None, card, memory)
     assert strict.flagged and strict.predicted_type is MisrouteType.CAPABILITY
 
+
+def test_blank_value_with_comment_is_not_a_value(tmp_path, monkeypatch):
+    from misroute.env import load_dotenv
+    for k in ("BLANK_KEY", "REAL_KEY", "NAME_KEY"):
+        monkeypatch.delenv(k, raising=False)
+    f = tmp_path / ".env"
+    f.write_text("BLANK_KEY=            # where to get it\nREAL_KEY=abc123   # note\nNAME_KEY=Ada Lovelace ada@example.com\n")
+    assert load_dotenv(f) == {"REAL_KEY": "abc123", "NAME_KEY": "Ada Lovelace ada@example.com"}
