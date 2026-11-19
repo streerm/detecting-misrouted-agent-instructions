@@ -1,0 +1,10 @@
+{"id": "r001", "instruction": "What is AAPL's share price at today's close, in USD, with the as-of time?", "gold_agent": "market-data"}
+{"id": "r002", "instruction": "From the latest 10-K, compare Item 1A risk factors with the prior year: new, removed and reworded.", "gold_agent": "filings"}
+{"id": "r003", "instruction": "Pull the debt maturity schedule from the debt note in MSFT's 10-K and flag anything due within 24 months.", "gold_agent": "filings"}
+{"id": "r004", "instruction": "Give me US CPI year-on-year for the last 24 months as a table.", "gold_agent": "macro"}
+{"id": "r005", "instruction": "Backtest a 50/200-day moving-average crossover on SPY from 2015 to 2025; report Sharpe and max drawdown.", "gold_agent": "backtest"}
+{"id": "r006", "instruction": "Is NVDA on the restricted list, and can this trade be pre-cleared?", "gold_agent": "compliance"}
+{"id": "r007", "instruction": "What was the 10-year treasury yield on the first trading day of each month this year?", "gold_agent": "macro"}
+{"id": "r008", "instruction": "Reconcile reported to adjusted EBITDA in the 10-K: every add-back, its page, and the year-on-year change.", "gold_agent": "filings"}
+{"id": "r009", "instruction": "What are AMZN's trailing EPS and P/E today?", "gold_agent": "market-data"}
+{"id": "r010", "instruction": "Can compliance approve the desk's pending TSLA trade, given the restricted list?", "gold_agent": "compliance"}

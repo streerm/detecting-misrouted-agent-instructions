@@ -1,0 +1,13 @@
+# Shared intent vocabulary. Cards' capability.intents must come from here.
+# keywords are a cheap baseline signal for the keyword router and capability check; LLM components ignore them.
+route_request: [route, delegate]
+get_price: [price, close, quote, trading at, market cap, share price]
+get_fundamentals: [eps, p/e, fundamentals, earnings per share, valuation multiple]
+extract_figure: [10-k, 10-q, filing, annual report, item 1a, md&a, debt note, segment note]
+compare_sections: [compare, versus, vs, changed between, new risks, removed]
+summarise_filing: [summarise, summary of the filing]
+get_macro_series: [cpi, gdp, inflation, unemployment, fed funds, treasury yield, macro]
+run_backtest: [backtest, sharpe, drawdown, strategy returns, simulate]
+check_compliance: [compliance, restricted list, insider, pre-clear, policy]
+approve_trade: [approve, sign off, authorise]
+place_order: [buy, sell, place an order, execute trade]

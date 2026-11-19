@@ -1,0 +1,20 @@
+id: macro
+name: Macro data agent
+description: Retrieves and describes macroeconomic time series.
+role: specialist
+parent: router
+capability:
+  intents: [get_macro_series]
+  inputs: [series_id, date_range, frequency]
+  outputs: [time_series, table]
+context_scope:
+  domains: [macro]
+  data_sources: [fred, alpha_vantage]
+  out_of_scope: [sec_filings, live_prices, backtests]
+authority:
+  level: read_only
+  may: [read_macro]
+  may_not: [place_order, approve_trade, send_external]
+skills: [finance-research-rules]
+tools: [fred]
+model: default

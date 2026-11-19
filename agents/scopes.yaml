@@ -1,0 +1,14 @@
+# Maps context_scope.out_of_scope tokens to intents (for the capability-profile check)
+# and to a phrase that drags an instruction into that scope (for context-mismatch injection).
+live_prices:
+  intents: [get_price]
+  phrase: "and include today's closing share price"
+sec_filings:
+  intents: [extract_figure]
+  phrase: "and cite the relevant section of the latest 10-K"
+macro_series:
+  intents: [get_macro_series]
+  phrase: "and adjust it for the latest CPI print"
+backtests:
+  intents: [run_backtest]
+  phrase: "and backtest the result from 2015"

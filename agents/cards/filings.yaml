@@ -1,0 +1,21 @@
+id: filings
+name: Filings analyst
+description: Extracts and compares figures and sections from SEC filings.
+role: specialist
+parent: router
+capability:
+  intents: [extract_figure, compare_sections, summarise_filing]
+  inputs: [ticker, cik, filing_type, period, section]
+  outputs: [table, quote_with_citation]
+context_scope:
+  domains: [sec_filings]
+  data_sources: [sec_edgar]
+  periods: "fiscal, as reported"
+  out_of_scope: [live_prices, macro_series, backtests]
+authority:
+  level: read_only
+  may: [read_filings]
+  may_not: [place_order, approve_trade, send_external]
+skills: [finance-research-rules, source-cross-check]
+tools: [sec_edgar]
+model: default

@@ -1,0 +1,44 @@
+# Model registry. Cards refer to models by NAME; swap per experiment with --model.
+# provider: anthropic | openai_compat | echo
+# api_key_env names an environment variable; keys live in .env, never here.
+default: echo
+
+models:
+  echo:                       # offline, deterministic; used by tests and the default demo
+    provider: echo
+
+  claude-sonnet:
+    provider: anthropic
+    model: claude-sonnet-5-5
+    api_key_env: ANTHROPIC_API_KEY
+    max_tokens: 2048
+
+  claude-haiku:
+    provider: anthropic
+    model: claude-haiku-5-5
+    api_key_env: ANTHROPIC_API_KEY
+    max_tokens: 2048
+
+  qwen-local:                 # `ollama pull qwen2.5:7b`
+    provider: openai_compat
+    base_url: http://localhost:11434/v1
+    model: qwen2.5:7b
+    api_key_env: null
+
+  llama-local:                # `ollama pull llama3.1:8b`
+    provider: openai_compat
+    base_url: http://localhost:11434/v1
+    model: llama3.1:8b
+    api_key_env: null
+
+  vllm-server:                # e.g. a the sponsor GPU box running `vllm serve <model>`
+    provider: openai_compat
+    base_url: http://localhost:8000/v1
+    model: Qwen/Qwen2.5-32B-Instruct
+    api_key_env: null
+
+  together-llama-70b:
+    provider: openai_compat
+    base_url: https://api.together.xyz/v1
+    model: meta-llama/Llama-3.3-70B-Instruct-Turbo
+    api_key_env: TOGETHER_API_KEY

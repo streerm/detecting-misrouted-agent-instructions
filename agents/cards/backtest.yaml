@@ -1,0 +1,20 @@
+id: backtest
+name: Backtest agent
+description: Runs and reports backtests of simple strategies on historical data.
+role: specialist
+parent: router
+capability:
+  intents: [run_backtest]
+  inputs: [strategy_spec, universe, date_range]
+  outputs: [metrics_table, equity_curve]
+context_scope:
+  domains: [backtesting]
+  data_sources: [alpha_vantage, internal_backtests]
+  out_of_scope: [sec_filings, live_prices]
+authority:
+  level: execute
+  may: [run_simulation]
+  may_not: [place_order, approve_trade, send_external]
+skills: [finance-research-rules]
+tools: []
+model: default
