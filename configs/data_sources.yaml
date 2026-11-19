@@ -2,7 +2,7 @@
 # "connect" says how a human connects it; agents get access only via tools listed in their card.
 sec_edgar:
   gives: US filings (10-K, 10-Q, 8-K, DEF 14A) and XBRL financials
-  connect: edgartools Python library (pip install edgartools); set EDGAR_IDENTITY
+  connect: MCP server 'edgartools' in .mcp.json (edgartools-mcp, open source); set EDGAR_IDENTITY in .env
   cost: free
 alpha_vantage:
   gives: prices, fundamentals, earnings, FX, commodities, macro, news sentiment
@@ -10,7 +10,7 @@ alpha_vantage:
   cost: free key (rate-limited)
 fred:
   gives: 800,000+ macro series (rates, CPI, GDP)
-  connect: community MCP server or fredapi; FRED_API_KEY
+  connect: MCP server 'fred' in .mcp.json (npm fred-mcp-server by Stefano Amorelli, AGPL-3.0); FRED_API_KEY in .env
   cost: free key
 companies_house:
   gives: UK company accounts, officers, persons with significant control

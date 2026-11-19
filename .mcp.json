@@ -1,0 +1,29 @@
+{
+  "mcpServers": {
+    "edgartools": {
+      "command": "uvx",
+      "args": [
+        "--from",
+        "edgartools[ai]==6.3.0",
+        "edgartools-mcp"
+      ],
+      "env": {
+        "EDGAR_IDENTITY": "${EDGAR_IDENTITY}"
+      }
+    },
+    "fred": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "-p",
+        "fred-mcp-server@1.2.0",
+        "sh",
+        "-c",
+        "exec node \"$(realpath \"$(command -v fred-mcp-server)\")\""
+      ],
+      "env": {
+        "FRED_API_KEY": "${FRED_API_KEY}"
+      }
+    }
+  }
+}

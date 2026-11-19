@@ -17,5 +17,5 @@ authority:
   may: [read_filings]
   may_not: [place_order, approve_trade, send_external]
 skills: [finance-research-rules, source-cross-check]
-tools: [sec_edgar]
+tools: [edgartools]
 model: default

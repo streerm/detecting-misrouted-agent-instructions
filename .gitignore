@@ -1,4 +1,7 @@
 .env
+*.env
+.env.bak
+!.env.template
 .venv/
 __pycache__/
 *.egg-info/
@@ -7,3 +10,5 @@ runs/
 traces/
 *.jsonl.tmp
 .DS_Store
+CLAUDE.local.md
+.claude/settings.local.json

@@ -5,6 +5,7 @@ from pathlib import Path
 from typing import Callable
 
 from ..cards import load_yaml
+from ..env import expand, load_dotenv
 from .base import ChatModel
 from .echo import EchoModel
 
@@ -41,7 +42,8 @@ class ModelRegistry:
         if name not in self._cache:
             if name not in self.specs:
                 raise KeyError(f"model '{name}' not in registry; known: {sorted(self.specs)}")
-            spec = dict(self.specs[name])
+            load_dotenv()
+            spec = {k: expand(v) if isinstance(v, str) else v for k, v in self.specs[name].items()}
             provider = spec.pop("provider")
             if provider not in PROVIDERS:
                 raise KeyError(f"unknown provider '{provider}'; known: {sorted(PROVIDERS)}")

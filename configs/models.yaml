@@ -1,6 +1,7 @@
 # Model registry. Cards refer to models by NAME; swap per experiment with --model.
 # provider: anthropic | openai_compat | echo
 # api_key_env names an environment variable; keys live in .env, never here.
+# String values may use ${VAR} or ${VAR:-default}, expanded from .env.
 default: echo
 
 models:
@@ -21,21 +22,33 @@ models:
 
   qwen-local:                 # `ollama pull qwen2.5:7b`
     provider: openai_compat
-    base_url: http://localhost:11434/v1
+    base_url: ${OLLAMA_BASE_URL:-http://localhost:11434/v1}
     model: qwen2.5:7b
     api_key_env: null
 
   llama-local:                # `ollama pull llama3.1:8b`
     provider: openai_compat
-    base_url: http://localhost:11434/v1
+    base_url: ${OLLAMA_BASE_URL:-http://localhost:11434/v1}
     model: llama3.1:8b
     api_key_env: null
 
   vllm-server:                # e.g. a the sponsor GPU box running `vllm serve <model>`
     provider: openai_compat
-    base_url: http://localhost:8000/v1
+    base_url: ${VLLM_BASE_URL:-http://localhost:8000/v1}
     model: Qwen/Qwen2.5-32B-Instruct
     api_key_env: null
+
+  openrouter-qwen-72b:
+    provider: openai_compat
+    base_url: https://openrouter.ai/api/v1
+    model: qwen/qwen-2.5-72b-instruct
+    api_key_env: OPENROUTER_API_KEY
+
+  groq-llama-70b:
+    provider: openai_compat
+    base_url: https://api.groq.com/openai/v1
+    model: llama-3.3-70b-versatile
+    api_key_env: GROQ_API_KEY
 
   together-llama-70b:
     provider: openai_compat

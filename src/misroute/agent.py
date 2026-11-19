@@ -1,11 +1,11 @@
-"""SkillAgent = card + model + skills. Same class for every vendor and every role."""
+"""SkillAgent = card + model + skills (+ MCP tools from its card). Same class for every vendor and role."""
 from __future__ import annotations
 
 import time
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 from .cards import AgentCard
-from .models import ChatModel
+from .models import ChatModel, turn
 from .skills import Skill, build_system_prompt
 
 
@@ -16,6 +16,7 @@ class AgentOutput:
     instruction: str
     text: str
     seconds: float
+    tool_calls: list[dict] = field(default_factory=list)   # [{"name", "arguments", "result_chars", "error"}]
 
     @property
     def refused(self) -> bool:
@@ -23,18 +24,40 @@ class AgentOutput:
 
 
 class SkillAgent:
-    def __init__(self, card: AgentCard, model: ChatModel, skills: dict[str, Skill]):
-        self.card, self.model = card, model
+    def __init__(self, card: AgentCard, model: ChatModel, skills: dict[str, Skill],
+                 hub=None, max_tool_steps: int = 6):
+        self.card, self.model, self.hub, self.max_tool_steps = card, model, hub, max_tool_steps
         self.system = build_system_prompt(card, skills)
+
+    def tools(self):
+        """Only the servers named in this agent's card. Access control lives here."""
+        return self.hub.specs(self.card.tools) if self.hub and self.card.tools else []
 
     def run(self, instruction: str) -> AgentOutput:
         t0 = time.perf_counter()
-        text = self.model.complete([{"role": "user", "content": instruction}], system=self.system)
-        return AgentOutput(self.card.id, self.model.name, instruction, text, time.perf_counter() - t0)
+        tools = self.tools()
+        messages: list[dict] = [{"role": "user", "content": instruction}]
+        log: list[dict] = []
+        text = ""
+        for _ in range(self.max_tool_steps + 1):
+            step = turn(self.model, messages, system=self.system, tools=tools)
+            text = step.text
+            if not step.tool_calls:
+                break
+            messages.append({"role": "assistant", "content": step.text, "tool_calls": [
+                {"id": c.id, "name": c.name, "arguments": c.arguments} for c in step.tool_calls]})
+            for c in step.tool_calls:
+                result = self.hub.call(c.name, c.arguments)
+                log.append({"name": c.name, "arguments": c.arguments, "result_chars": len(result),
+                            "error": result.startswith("ERROR")})
+                messages.append({"role": "tool", "tool_call_id": c.id, "name": c.name, "content": result})
+        else:
+            text = text or "STOPPED: tool step limit reached"
+        return AgentOutput(self.card.id, self.model.name, instruction, text, time.perf_counter() - t0, log)
 
 
 def build_agents(cards: dict[str, AgentCard], skills: dict[str, Skill], registry,
-                 override_model: str | None = None) -> dict[str, SkillAgent]:
+                 override_model: str | None = None, hub=None) -> dict[str, SkillAgent]:
     """override_model swaps every agent's model at once (e.g. run the whole desk on Qwen)."""
-    return {cid: SkillAgent(c, registry.get(override_model or c.model), skills)
+    return {cid: SkillAgent(c, registry.get(override_model or c.model), skills, hub)
             for cid, c in cards.items()}

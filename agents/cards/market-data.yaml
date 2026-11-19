@@ -17,5 +17,5 @@ authority:
   may: [read_market_data]
   may_not: [place_order, approve_trade, send_external]
 skills: [finance-research-rules]
-tools: [alpha_vantage]
+tools: []   # Alpha Vantage: add a server to .mcp.json, then list it here
 model: default

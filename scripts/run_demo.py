@@ -30,10 +30,11 @@ def main() -> None:
     ap.add_argument("--reference-model", help="model for the contrastive reference agent")
     ap.add_argument("--requests", default=str(REPO_ROOT / "data/requests/sample.jsonl"))
     ap.add_argument("--seed", type=int, default=0)
+    ap.add_argument("--tools", action="store_true", help="start MCP servers from .mcp.json for agents' cards")
     ap.add_argument("--trace", default=str(REPO_ROOT / f"traces/demo-{int(time.time())}.jsonl"))
     args = ap.parse_args()
 
-    desk = load_desk(model=args.model)
+    desk = load_desk(model=args.model, tools=args.tools)
     reqs = load_requests(args.requests)
     keyword = KeywordRouter(desk.intents)
     router = LLMRouter(desk.registry.get(args.router_model), fallback=keyword) if args.router_model else keyword
@@ -56,6 +57,10 @@ def main() -> None:
           "scores are a plumbing check, not a result. Real numbers need LLM intent extraction,\n"
           "held-out paraphrased requests, and real model outputs.")
     print(f"\ntraces: {args.trace}")
+    if desk.hub:
+        if desk.hub.errors:
+            print(f"tool servers not started: {desk.hub.errors}")
+        desk.hub.close()
 
 
 if __name__ == "__main__":
