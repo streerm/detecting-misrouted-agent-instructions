@@ -6,8 +6,12 @@ sec_edgar:
   cost: free
 alpha_vantage:
   gives: prices, fundamentals, earnings, FX, commodities, macro, news sentiment
-  connect: Alpha Vantage MCP server or REST API; ALPHAVANTAGE_API_KEY
+  connect: MCP server 'alphavantage' in .mcp.json (official local server, PyPI marketdata-mcp-server 0.3.1, MIT; exposes TOOL_LIST / TOOL_GET / TOOL_CALL over ~120 functions); ALPHAVANTAGE_API_KEY in .env
   cost: free key (rate-limited)
+finnhub:
+  gives: quotes, company news and sentiment, estimates, ownership, calendars
+  connect: MCP server 'finnhub' in .mcp.json (community, PyPI mcp-finnhub 1.1.1 by Rob Sherman, MIT; not built by Finnhub); FINNHUB_API_KEY in .env
+  cost: free key (60 calls/minute)
 fred:
   gives: 800,000+ macro series (rates, CPI, GDP)
   connect: MCP server 'fred' in .mcp.json (npm fred-mcp-server by Stefano Amorelli, AGPL-3.0); FRED_API_KEY in .env

@@ -24,6 +24,30 @@
       "env": {
         "FRED_API_KEY": "${FRED_API_KEY}"
       }
+    },
+    "alphavantage": {
+      "command": "uvx",
+      "args": [
+        "--from",
+        "marketdata-mcp-server==0.3.1",
+        "--with",
+        "mcp<2",
+        "marketdata-mcp",
+        "${ALPHAVANTAGE_API_KEY}"
+      ],
+      "env": {
+        "ALPHAVANTAGE_API_KEY": "${ALPHAVANTAGE_API_KEY}"
+      }
+    },
+    "finnhub": {
+      "command": "uvx",
+      "args": [
+        "mcp-finnhub==1.1.1"
+      ],
+      "env": {
+        "FINNHUB_API_KEY": "${FINNHUB_API_KEY}",
+        "FINNHUB_STORAGE_DIR": "${HOME}/.cache/mcp-finnhub"
+      }
     }
   }
 }

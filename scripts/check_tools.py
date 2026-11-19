@@ -16,6 +16,8 @@ from misroute.tools.mcp_hub import ToolHub, load_mcp_config
 SMOKE = {  # one cheap, read-only call per server: (tool name contains, arguments)
     "fred": ("search", {"search_text": "consumer price index"}),
     "edgartools": ("company", {"identifier": "AAPL"}),
+    "alphavantage": ("tool_call", {"tool_name": "GLOBAL_QUOTE", "arguments": {"symbol": "IBM"}}),
+    "finnhub": ("stock_market_data", {"operation": "get_quote", "symbol": "AAPL"}),
 }
 
 

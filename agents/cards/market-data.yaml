@@ -9,7 +9,7 @@ capability:
   outputs: [table, time_series]
 context_scope:
   domains: [market_data]
-  data_sources: [alpha_vantage]
+  data_sources: [alpha_vantage, finnhub]
   periods: "trading days; as-of timestamp required"
   out_of_scope: [sec_filings, macro_series, backtests]
 authority:
@@ -17,5 +17,5 @@ authority:
   may: [read_market_data]
   may_not: [place_order, approve_trade, send_external]
 skills: [finance-research-rules]
-tools: []   # Alpha Vantage: add a server to .mcp.json, then list it here
+tools: [alphavantage, finnhub]
 model: default
