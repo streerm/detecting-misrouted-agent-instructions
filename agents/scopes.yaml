@@ -12,3 +12,6 @@ macro_series:
 backtests:
   intents: [run_backtest]
   phrase: "and backtest the result from 2015"
+news:
+  intents: [get_news]
+  phrase: "and add this week's news headlines on the company"

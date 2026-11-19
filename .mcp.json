@@ -129,6 +129,23 @@
         "python",
         "mcp_servers/backtest.py"
       ]
+    },
+    "news": {
+      "command": "uv",
+      "args": [
+        "run",
+        "--no-project",
+        "--with",
+        "mcp>=1.28,<2",
+        "--with",
+        "pyyaml",
+        "python",
+        "mcp_servers/news.py"
+      ],
+      "env": {
+        "FINNHUB_API_KEY": "${FINNHUB_API_KEY}",
+        "ALPHAVANTAGE_API_KEY": "${ALPHAVANTAGE_API_KEY}"
+      }
     }
   }
 }

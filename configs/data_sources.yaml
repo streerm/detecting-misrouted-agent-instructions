@@ -10,6 +10,7 @@ alpha_vantage:
   cost: free key (rate-limited)
 finnhub:
   gives: quotes, company news and sentiment, estimates, ownership, calendars
+  news_agent: MCP server 'news' in .mcp.json (ours, mcp_servers/news.py) gives the news agent company news only, without price tools
   connect: MCP server 'finnhub' in .mcp.json (community, PyPI mcp-finnhub 1.1.1 by Rob Sherman, MIT; not built by Finnhub); FINNHUB_API_KEY in .env
   cost: free key (60 calls/minute)
 fred:

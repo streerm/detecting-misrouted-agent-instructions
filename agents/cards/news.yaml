@@ -1,0 +1,21 @@
+id: news
+name: News and commentary agent
+description: Company news and what management said on earnings calls, each dated and linked or quoted.
+role: specialist
+parent: router
+capability:
+  intents: [get_news, get_transcript]
+  inputs: [ticker, date_range, fiscal_quarter, topic]
+  outputs: [dated_list, quotes]
+context_scope:
+  domains: [news, management_commentary]
+  data_sources: [finnhub, alpha_vantage]
+  periods: "dated items only; state the fiscal quarter of any call"
+  out_of_scope: [live_prices, sec_filings, macro_series, backtests]
+authority:
+  level: read_only
+  may: [read_news, read_transcripts]
+  may_not: [place_order, approve_trade, send_external]
+skills: [finance-research-rules, source-cross-check]
+tools: [news]
+model: default

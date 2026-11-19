@@ -50,3 +50,19 @@ def test_catalogue_links_sources_to_agents():
     assert rows["sec_edgar"]["agents"] == ["filings"] and "macro" in rows["dbnomics"]["agents"]
     assert "known" in json.loads(catalogue.describe_source("nope"))["data"]
 
+
+def test_news_shapes():
+    import news
+    items = [{"datetime": 1795000000, "headline": "B", "source": "s", "url": "u", "summary": "x" * 400},
+             {"datetime": 1795090000, "headline": "A", "source": "s", "url": "u", "summary": None}]
+    rows = news.shape_finnhub(items, 5)
+    assert [r["headline"] for r in rows] == ["A", "B"] and len(rows[1]["summary"]) == 300 and rows[0]["date"] == "2026-11-19"
+    call = {"symbol": "X", "quarter": "2026Q4", "transcript": [
+        {"speaker": "CFO", "title": "CFO", "content": "Gross margin rose. " * 10},
+        {"speaker": "CEO", "title": "CEO", "content": "Demand was steady."},
+        {"speaker": "CFO", "title": "CFO", "content": "We expect margin pressure."}]}
+    got = news.shape_transcript(call, "margin", 60)
+    assert got["turns_matching"] == 2 and got["turns_returned"] == 1 and got["truncated"]
+    assert got["turns"][0]["text"].endswith("…[cut]") and len(got["turns"][0]["text"]) < 70
+    full = news.shape_transcript(call, "", 10000)
+    assert full["turns_returned"] == 3 and not full["truncated"]

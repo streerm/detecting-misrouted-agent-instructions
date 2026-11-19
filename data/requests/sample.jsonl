@@ -8,3 +8,5 @@
 {"id": "r008", "instruction": "Reconcile reported to adjusted EBITDA in the 10-K: every add-back, its page, and the year-on-year change.", "gold_agent": "filings"}
 {"id": "r009", "instruction": "What are AMZN's trailing EPS and P/E today?", "gold_agent": "market-data"}
 {"id": "r010", "instruction": "Can compliance approve the desk's pending TSLA trade, given the restricted list?", "gold_agent": "compliance"}
+{"id": "r011", "instruction": "List the main news headlines on NKE over the last 30 days, each with its date and link.", "gold_agent": "news"}
+{"id": "r012", "instruction": "From the latest earnings call transcript, list word for word what management said about next quarter's margins.", "gold_agent": "news"}

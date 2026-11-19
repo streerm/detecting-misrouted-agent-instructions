@@ -23,6 +23,7 @@ SMOKE = {  # one cheap, read-only call per server: (tool name contains, argument
     "sanctions": ("list_status", {}),
     "companies_house": ("search_companies", {"query": "Tesco", "limit": 2}),
     "backtest": ("list_backtests", {}),
+    "news": ("company_news", {"symbol": "NKE", "days": 7, "limit": 3}),
     "finnhub": ("stock_market_data", {"operation": "get_quote", "symbol": "AAPL"}),
 }
 
