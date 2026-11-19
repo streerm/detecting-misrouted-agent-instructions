@@ -35,11 +35,14 @@ def parse_skill(path: str | Path) -> Skill:
 
 
 def load_skills(directory: str | Path) -> dict[str, Skill]:
-    skills = {}
-    for p in sorted(Path(directory).glob("*/SKILL.md")):
+    """Finds SKILL.md at any depth (own skills at skills/<name>/, vendored ones under skills/vendor/...)."""
+    skills: dict[str, Skill] = {}
+    for p in sorted(Path(directory).rglob("SKILL.md")):
         s = parse_skill(p)
         if s.name != p.parent.name:
             raise ValueError(f"{p}: name '{s.name}' must match folder '{p.parent.name}'")
+        if s.name in skills:
+            raise ValueError(f"duplicate skill name '{s.name}': {skills[s.name].path} and {p.parent}")
         skills[s.name] = s
     return skills
 

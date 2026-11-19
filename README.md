@@ -9,6 +9,10 @@ The framework is **model-agnostic**: every agent is a *card* (YAML) plus *skills
 ```
 skills/            Reusable skills in the open Agent Skills format (SKILL.md + optional files).
                    Work with Claude natively; other models get them injected by src/misroute/skills.py.
+  <name>/            Our own skills (finance research rules, cross-checking, cards, labelling).
+  vendor/anthropic-financial-services/
+                     Anthropic's official finance skills (comps, DCF, LBO, 3-statement, earnings,
+                     IC memo, pitch deck, ...), Apache 2.0, unmodified. See NOTICE.md there.
 agents/cards/      One YAML card per agent: capability, context scope, authority, skills, tools, model.
 configs/           models.yaml (model registry), data_sources.yaml (which data each agent may touch).
 src/misroute/      The framework.

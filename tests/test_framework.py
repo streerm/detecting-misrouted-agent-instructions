@@ -26,9 +26,11 @@ def test_spec_wording_is_exact():
 
 
 def test_all_skills_parse_and_match_folder():
-    for p in (REPO_ROOT / "skills").glob("*/SKILL.md"):
-        s = parse_skill(p)
-        assert s.name == p.parent.name and len(s.description) > 20
+    from misroute.skills import load_skills
+    skills = load_skills(REPO_ROOT / "skills")
+    assert {"finance-research-rules", "dcf-model", "comps-analysis", "lbo-model",
+            "3-statement-model", "earnings-analysis", "ic-memo", "pitch-deck"} <= set(skills)
+    assert all(len(s.description) > 20 for s in skills.values())
 
 
 def test_cards_reference_known_skills_and_models(desk):
