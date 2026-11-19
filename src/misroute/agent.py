@@ -16,7 +16,9 @@ class AgentOutput:
     instruction: str
     text: str
     seconds: float
-    tool_calls: list[dict] = field(default_factory=list)   # [{"name", "arguments", "result_chars", "error"}]
+    # [{"name", "arguments", "result_chars", "error", "out_of_card"}]
+    tool_calls: list[dict] = field(default_factory=list)
+    tools_offered: list[str] = field(default_factory=list)  # qualified tool names the agent could call
 
     @property
     def refused(self) -> bool:
@@ -36,6 +38,7 @@ class SkillAgent:
     def run(self, instruction: str) -> AgentOutput:
         t0 = time.perf_counter()
         tools = self.tools()
+        offered = [t.name for t in tools]
         messages: list[dict] = [{"role": "user", "content": instruction}]
         log: list[dict] = []
         text = ""
@@ -47,13 +50,16 @@ class SkillAgent:
             messages.append({"role": "assistant", "content": step.text, "tool_calls": [
                 {"id": c.id, "name": c.name, "arguments": c.arguments} for c in step.tool_calls]})
             for c in step.tool_calls:
-                result = self.hub.call(c.name, c.arguments)
+                # A model can name a tool it was never offered; the card, not the hub, decides.
+                allowed = c.name in offered
+                result = (self.hub.call(c.name, c.arguments) if allowed
+                          else f"ERROR: tool {c.name} is not in this agent's card")
                 log.append({"name": c.name, "arguments": c.arguments, "result_chars": len(result),
-                            "error": result.startswith("ERROR")})
+                            "error": result.startswith("ERROR"), "out_of_card": not allowed})
                 messages.append({"role": "tool", "tool_call_id": c.id, "name": c.name, "content": result})
         else:
             text = text or "STOPPED: tool step limit reached"
-        return AgentOutput(self.card.id, self.model.name, instruction, text, time.perf_counter() - t0, log)
+        return AgentOutput(self.card.id, self.model.name, instruction, text, time.perf_counter() - t0, log, offered)
 
 
 def build_agents(cards: dict[str, AgentCard], skills: dict[str, Skill], registry,

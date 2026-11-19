@@ -15,7 +15,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
 from misroute import REPO_ROOT
 from misroute.desk import load_desk, load_requests
-from misroute.detectors import CapabilityProfileCheck, ContrastiveOutputDetector, SelfReportDetector
+from misroute.detectors import CapabilityProfileCheck, ContrastiveOutputDetector, SelfReportDetector, ToolCallDetector
 from misroute.eval import format_report, score
 from misroute.inject import build_cases
 from misroute.pipeline import run_case
@@ -47,6 +47,7 @@ def main() -> None:
         CapabilityProfileCheck(desk.intents, desk.scopes),
         ContrastiveOutputDetector(lambda c: ref_agents[c.gold_agent].run(c.instruction)),
         SelfReportDetector(),
+        ToolCallDetector(),   # abstains unless the agent was offered tools (--tools)
     ]
     cases = build_cases(reqs, desk.cards, routed, desk.scopes, seed=args.seed)
     tracer = Tracer(args.trace)

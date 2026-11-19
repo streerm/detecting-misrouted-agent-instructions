@@ -67,7 +67,8 @@ def test_json_mode_turn():
 def hub():
     pytest.importorskip("mcp")
     from misroute.tools.mcp_hub import ToolHub
-    h = ToolHub({"fake": {"command": sys.executable, "args": [str(HERE / "fake_mcp_server.py")]},
+    fake = {"command": sys.executable, "args": [str(HERE / "fake_mcp_server.py")]}
+    h = ToolHub({"fake": fake, "fake2": fake,
                  "needs_key": {"command": "true", "env": {"K": "${SURELY_UNSET_VAR_123}"}}})
     yield h
     h.close()
@@ -90,3 +91,38 @@ def test_agent_tool_loop_with_card_scoping(hub):
     assert out.tool_calls[0]["name"] == "fake__get_series" and "3.0" in out.text
     # an agent whose card lists no servers gets no tools at all
     assert SkillAgent(desk.cards["compliance"], ScriptedModel(), desk.skills, hub).tools() == []
+
+
+class RogueModel(ScriptedModel):
+    """Native-tool-calling model that names a tool it was never offered."""
+    name = "rogue"
+
+    def complete_turn(self, messages, *, system=None, tools=None, **_):
+        if any(m["role"] == "tool" for m in messages):
+            return Turn(text="Done.")
+        return Turn(tool_calls=[ToolCall("c1", "fake__get_series", {"series_id": "CPIAUCSL"})])
+
+
+def test_out_of_card_call_is_blocked_and_flagged(hub):
+    from misroute.agent import AgentOutput, SkillAgent
+    from misroute.desk import load_desk
+    from misroute.detectors import ToolCallDetector
+    from misroute.taxonomy import MisrouteType
+    desk = load_desk()
+    hub.specs(["fake", "fake2"])                          # both servers are running in the hub
+    card = desk.cards["macro"].model_copy(update={"tools": ["fake2"]})   # but the card lists only fake2
+    out = SkillAgent(card, RogueModel(), desk.skills, hub).run("US CPI last month?")
+    assert out.tool_calls == [{"name": "fake__get_series", "arguments": {"series_id": "CPIAUCSL"},
+                               "result_chars": out.tool_calls[0]["result_chars"], "error": True,
+                               "out_of_card": True}]
+    d = ToolCallDetector().detect(None, card, out)
+    assert d.flagged and d.predicted_type is MisrouteType.CONTEXT and "fake__get_series" in d.reason
+
+    det = ToolCallDetector()
+    blank = AgentOutput("macro", "m", "q", "CPI was 3.0", 0.0)
+    assert det.detect(None, card, blank).reason.startswith("no tools offered")      # abstains
+    memory = AgentOutput("macro", "m", "q", "CPI was 3.0", 0.0, [], ["fake2__get_series"])
+    assert det.detect(None, card, memory).score == 0.5 and not det.detect(None, card, memory).flagged
+    strict = ToolCallDetector(flag_no_calls=True).detect(None, card, memory)
+    assert strict.flagged and strict.predicted_type is MisrouteType.CAPABILITY
+
