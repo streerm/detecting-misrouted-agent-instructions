@@ -48,6 +48,87 @@
         "FINNHUB_API_KEY": "${FINNHUB_API_KEY}",
         "FINNHUB_STORAGE_DIR": "${HOME}/.cache/mcp-finnhub"
       }
+    },
+    "catalogue": {
+      "command": "uv",
+      "args": [
+        "run",
+        "--no-project",
+        "--with",
+        "mcp>=1.28,<2",
+        "--with",
+        "pyyaml",
+        "python",
+        "mcp_servers/catalogue.py"
+      ]
+    },
+    "dbnomics": {
+      "command": "uv",
+      "args": [
+        "run",
+        "--no-project",
+        "--with",
+        "mcp>=1.28,<2",
+        "--with",
+        "pyyaml",
+        "python",
+        "mcp_servers/dbnomics.py"
+      ]
+    },
+    "arxiv": {
+      "command": "uv",
+      "args": [
+        "run",
+        "--no-project",
+        "--with",
+        "mcp>=1.28,<2",
+        "--with",
+        "pyyaml",
+        "python",
+        "mcp_servers/arxiv.py"
+      ]
+    },
+    "sanctions": {
+      "command": "uv",
+      "args": [
+        "run",
+        "--no-project",
+        "--with",
+        "mcp>=1.28,<2",
+        "--with",
+        "pyyaml",
+        "python",
+        "mcp_servers/sanctions.py"
+      ]
+    },
+    "companies_house": {
+      "command": "uv",
+      "args": [
+        "run",
+        "--no-project",
+        "--with",
+        "mcp>=1.28,<2",
+        "--with",
+        "pyyaml",
+        "python",
+        "mcp_servers/companies_house.py"
+      ],
+      "env": {
+        "COMPANIES_HOUSE_API_KEY": "${COMPANIES_HOUSE_API_KEY}"
+      }
+    },
+    "backtest": {
+      "command": "uv",
+      "args": [
+        "run",
+        "--no-project",
+        "--with",
+        "mcp>=1.28,<2",
+        "--with",
+        "pyyaml",
+        "python",
+        "mcp_servers/backtest.py"
+      ]
     }
   }
 }

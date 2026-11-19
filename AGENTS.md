@@ -10,6 +10,7 @@ Instructions for any coding agent (Claude Code, Codex, Cursor, Copilot, Aider…
 - Quote the spec exactly when naming misroute types; see `docs/spec-notes.md`.
 - Never commit `.env`, any `*.env`, keys, tokens, or raw the sponsor material. Secrets appear in `.mcp.json` only as `${VAR}`.
 - MCP servers are configured once in `.mcp.json` and shared by Claude Code and `src/misroute/tools/mcp_hub.py`; tool access per agent comes from its card's `tools:`.
+- Our own MCP servers live in `mcp_servers/` (standard library + `mcp` only, read-only, every result carries `source` and `retrieved_at`). Prefer writing a small one over adding an unvetted community server.
 - Prices and financial figures in any example must come from live data or a filing, with an as-of date, never from model memory (see `skills/finance-research-rules`).
 
 ## Commands

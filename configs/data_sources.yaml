@@ -18,14 +18,26 @@ fred:
   cost: free key
 companies_house:
   gives: UK company accounts, officers, persons with significant control
-  connect: community MCP server or REST API; COMPANIES_HOUSE_API_KEY
+  connect: MCP server 'companies_house' in .mcp.json (ours, mcp_servers/companies_house.py, read-only); COMPANIES_HOUSE_API_KEY in .env
   cost: free key
+dbnomics:
+  gives: non-US macro series from ECB, Eurostat, BoE, OECD, IMF and other providers
+  connect: MCP server 'dbnomics' in .mcp.json (ours, mcp_servers/dbnomics.py)
+  cost: free, no key
+arxiv:
+  gives: research paper search and abstracts
+  connect: MCP server 'arxiv' in .mcp.json (ours, mcp_servers/arxiv.py); no agent card uses it yet
+  cost: free, no key
+ofac_sdn:
+  gives: US Treasury sanctions list (SDN) name screening
+  connect: MCP server 'sanctions' in .mcp.json (ours, mcp_servers/sanctions.py); list cached daily
+  cost: free, no key
 web_search:
   gives: news, press releases, RNS
   connect: model's built-in search, or a search tool
   cost: varies
 internal_backtests:
   gives: results of the team's own backtests
-  connect: local files under runs/
+  connect: MCP server 'backtest' in .mcp.json (ours, mcp_servers/backtest.py); results saved under runs/backtests/
   cost: none
 # Rules: check who built any community server; keys in .env only; filings beat news when they disagree.

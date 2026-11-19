@@ -9,7 +9,7 @@ capability:
   outputs: [table, quote_with_citation]
 context_scope:
   domains: [sec_filings]
-  data_sources: [sec_edgar]
+  data_sources: [sec_edgar, companies_house]
   periods: "fiscal, as reported"
   out_of_scope: [live_prices, macro_series, backtests]
 authority:
@@ -17,5 +17,5 @@ authority:
   may: [read_filings]
   may_not: [place_order, approve_trade, send_external]
 skills: [finance-research-rules, source-cross-check]
-tools: [edgartools]
+tools: [edgartools, companies_house]
 model: default

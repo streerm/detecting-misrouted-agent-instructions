@@ -17,6 +17,12 @@ SMOKE = {  # one cheap, read-only call per server: (tool name contains, argument
     "fred": ("search", {"search_text": "consumer price index"}),
     "edgartools": ("company", {"identifier": "AAPL"}),
     "alphavantage": ("tool_call", {"tool_name": "GLOBAL_QUOTE", "arguments": {"symbol": "IBM"}}),
+    "catalogue": ("find_source", {"keyword": "filings"}),
+    "dbnomics": ("get_series", {"provider": "ECB", "dataset": "ICP", "series": "M.U2.N.000000.4.ANR", "last_n": 3}),
+    "arxiv": ("get_paper", {"arxiv_id": "2503.13657"}),
+    "sanctions": ("list_status", {}),
+    "companies_house": ("search_companies", {"query": "Tesco", "limit": 2}),
+    "backtest": ("list_backtests", {}),
     "finnhub": ("stock_market_data", {"operation": "get_quote", "symbol": "AAPL"}),
 }
 

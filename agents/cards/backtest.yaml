@@ -16,5 +16,5 @@ authority:
   may: [run_simulation]
   may_not: [place_order, approve_trade, send_external]
 skills: [finance-research-rules]
-tools: []
+tools: [backtest]
 model: default

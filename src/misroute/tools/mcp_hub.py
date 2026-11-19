@@ -83,7 +83,7 @@ class ToolHub:
 
         env = {**os.environ, **{k: expand(str(v)) for k, v in cfg.get("env", {}).items()}}
         params = StdioServerParameters(command=cfg["command"], args=[expand(a) for a in cfg.get("args", [])],
-                                       env=env, cwd=cfg.get("cwd"))
+                                       env=env, cwd=cfg.get("cwd") or str(REPO_ROOT))
         try:
             async with stdio_client(params) as (r, w), ClientSession(r, w) as session:
                 await session.initialize()

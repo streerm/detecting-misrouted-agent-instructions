@@ -9,12 +9,12 @@ capability:
   outputs: [decision_with_reason]
 context_scope:
   domains: [compliance]
-  data_sources: []
+  data_sources: [ofac_sdn]
   out_of_scope: [live_prices, sec_filings, macro_series]
 authority:
   level: approve
   may: [approve_trade, reject_trade]
   may_not: [place_order, send_external]
 skills: []
-tools: []
+tools: [sanctions]
 model: default

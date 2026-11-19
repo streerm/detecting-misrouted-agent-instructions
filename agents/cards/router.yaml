@@ -16,5 +16,5 @@ authority:
   may: [route]
   may_not: [place_order, approve_trade]
 skills: [agent-card-authoring]
-tools: []
+tools: [catalogue]
 model: default

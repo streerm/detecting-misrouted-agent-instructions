@@ -9,12 +9,12 @@ capability:
   outputs: [time_series, table]
 context_scope:
   domains: [macro]
-  data_sources: [fred, alpha_vantage]
+  data_sources: [fred, alpha_vantage, dbnomics]
   out_of_scope: [sec_filings, live_prices, backtests]
 authority:
   level: read_only
   may: [read_macro]
   may_not: [place_order, approve_trade, send_external]
 skills: [finance-research-rules]
-tools: [fred]
+tools: [fred, dbnomics]
 model: default
