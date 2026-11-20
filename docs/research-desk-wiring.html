@@ -61,6 +61,7 @@ header { display: flex; flex-direction: column; gap: 8px; }
 .legend { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: 13px; color: var(--muted); margin-left: auto; }
 .legend span { display: inline-flex; align-items: center; gap: 6px; }
 .key { width: 22px; height: 12px; border-radius: 3px; flex: none; }
+.statkey { fill: var(--surface); stroke: var(--muted); stroke-dasharray: 2 3; stroke-width: 1.4; }
 .key.real { border: 1.5px solid var(--ink); background: var(--surface); }
 .key.idea { border: 1.5px dotted var(--muted); background: var(--surface); }
 .key.hole { border: 1.5px dashed var(--gap); background: var(--gap-soft); }
@@ -100,6 +101,9 @@ svg#net { display: block; width: 100%; min-width: 1000px; height: auto; }
 .float.gap rect { stroke: var(--gap); }
 .float text { font: 12px var(--mono); fill: var(--ink); }
 .note { font: 12px var(--mono); fill: var(--gap); }
+.node.stat .box { stroke: var(--muted); stroke-dasharray: 2 3; stroke-width: 1.4; }
+.node.stat.active .box { stroke: var(--accent); stroke-width: 3; stroke-dasharray: none; }
+.bell { fill: none; stroke: var(--ink); stroke-width: 1.6; stroke-linecap: round; }
 
 .console { background: var(--console); border-top: 1px solid var(--line); padding: 10px 14px 12px; font: 13px/1.55 var(--mono);
   max-height: 290px; overflow-y: auto; display: flex; flex-direction: column; gap: 2px; }
@@ -124,7 +128,7 @@ svg#net { display: block; width: 100%; min-width: 1000px; height: auto; }
 .tag { font: 11px/1.5 var(--mono); padding: 1px 6px; border-radius: 4px; margin-left: auto; white-space: nowrap; }
 .tag.clean { background: var(--accent-soft); color: var(--accent); }
 .tag.misroute { background: var(--bad-soft); color: var(--bad); }
-.tag.hole, .tag.limited, .tag.recovered { background: var(--gap-soft); color: var(--gap); }
+.tag.hole, .tag.limited, .tag.recovered, .tag.proposed { background: var(--gap-soft); color: var(--gap); }
 .trace { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0; background: var(--surface);
   border: 1px solid var(--line); border-radius: 6px; }
 .trace li { padding: 8px 11px; border-bottom: 1px solid var(--line); font-size: 13.5px; display: grid; grid-template-columns: 22px minmax(0, 1fr); gap: 8px; }
@@ -155,7 +159,7 @@ code { font: 12.5px var(--mono); }
   <header>
     <p class="status">DRAFT · 20 NOV 2026 · EXAMPLE DESK, NOT A TEAM DECISION · NOTHING HERE IS ROUTED BY A REAL MODEL YET</p>
     <h1>Research Desk Wiring</h1>
-    <p class="lede">One orchestrator, six specialist agents and eleven tool servers, drawn four ways. Solid boxes are built and tested, dotted boxes are proposals, and dashed amber boxes are holes: things the desk needs and does not have. The traces are scripted illustrations of how a request would travel. None is a recording of a real run, and results are described, never given as figures.</p>
+    <p class="lede">One orchestrator, six specialist agents and eleven tool servers, drawn four ways. Solid boxes are built and tested. Dotted boxes are proposals and dashed amber boxes are missing pieces: neither is in the repo. Every box is used by at least one example, so the proposed and missing ones are shown as they would work if built, in dashed amber. The traces are scripted illustrations of how a request would travel. None is a recording of a real run, and results are described, never given as figures.</p>
     <p class="callout"><strong>Read this as a buffet, not a build plan.</strong> It shows more components and wirings than a six-week project will use, so the team can choose. What is real today: seven agent cards, eleven tool servers that answer direct calls, and detectors that run offline. No request has been routed or answered by a real model, and no architecture on this page is fully implemented.</p>
   </header>
 
@@ -172,8 +176,9 @@ code { font: 12.5px var(--mono); }
       <button class="switch" role="switch" id="animate" aria-checked="false"><span class="track"></span>Animate queries</button>
       <div class="legend">
         <span><i class="key real"></i>Built and tested</span>
-        <span><i class="key idea"></i>Proposed</span>
-        <span><i class="key hole"></i>Hole</span>
+        <span><i class="key idea"></i>Proposed, not in the repo</span>
+        <span><i class="key hole"></i>Missing, not in the repo</span>
+        <span><svg width="22" height="22" viewBox="-13 -13 26 26" aria-hidden="true"><circle class="box statkey" r="11"></circle><path class="bell" d="M-7,4 C-3,4 -4,-6 0,-6 C4,-6 3,4 7,4"></path></svg>Statistical check, placement open</span>
         <span><i class="key wrong"></i>Misrouted</span>
       </div>
     </div>
@@ -216,7 +221,7 @@ code { font: 12.5px var(--mono); }
         <li><b>Detectors in the graph</b><span>Four exist in code (capability-profile check, contrastive output, self-report, tool-call). None sits on a wire that runs.</span></li>
         <li><b>Gate and calibration</b><span>Nothing decides between "route it" and "ask a human", and no threshold is calibrated.</span></li>
         <li><b>Three of the four wirings</b><span>Peer links, one agent per person and second opinion are drawn, not built. The repo does one hop: router to one specialist.</span></li>
-        <li><b>Statistical guarantees</b><span>Where calibration, confidence gating and deferral sit is open, for the statisticians on the team to place. The "?" node marks it on every tab.</span></li>
+        <li><b>Statistical guarantees</b><span>Where calibration, confidence gating and deferral sit is open, for the statisticians on the team to place. The circles with a bell curve mark candidate places along the wires: is the route right, is the returned data valid, is the answer valid.</span></li>
         <li><b>Which model routes</b><span>A decision model (Jev), a reasoning diffusion model (d1) and other text diffusion models are named as candidates only. None has been tried against the keyword and LLM routers.</span></li>
       </ul></div>
       <div class="holegroup"><h3>Evidence</h3><ul>
@@ -276,7 +281,7 @@ code { font: 12.5px var(--mono); }
     p.tools.forEach(function (t) { HOLDER[t] = p.id; });
   });
 
-  var LABEL = { req: "Requester", orch: "Orchestrator", gate: "Checker", human: "Human reviewer", stat: "Statistical guarantees ?", model: "Router model" };
+  var LABEL = { req: "Requester", orch: "Orchestrator", gate: "Checker", human: "Human reviewer", stat: "Statistical check ?", model: "Router model" };
   DESK.concat(ROW2, PEOPLE).forEach(function (a) { LABEL[a.id] = a.name; });
 
   var TABS = {
@@ -332,12 +337,52 @@ code { font: 12.5px var(--mono); }
       why: "The question is about the desk's own positions. No agent holds them, so the nearest-sounding agent answers a different question." },
     { id: "q11", kind: "recovered", text: "What did management say about margins on the last earnings call?", script: referScript },
     { id: "q10", kind: "limited", text: "Is it still above the level we discussed?", script: limitedScript },
-    { id: "q8", kind: "hole", text: "Find recent papers on conformal prediction for routing.",
-      gold: "papers", asker: "tc",
-      stages: [{ agent: "papers", tool: "arxiv", does: "searches arXiv",
+    { id: "q16", kind: "proposed", text: "Approve the desk's pending TSLA trade.", script: signoffScript },
+    { id: "q8", kind: "proposed", text: "Find recent papers on conformal prediction for routing.", script: chainScript({
+      text: "Find recent papers on conformal prediction for routing.", tag: "needs a missing agent",
+      chain: [{ agent: "papers", does: "would search arXiv: the server works, but no agent holds it",
         call: "search_papers(query=\"all:\\\"conformal prediction\\\" AND all:routing\")", result: "paper list with abstracts · source arXiv API" }],
       answer: "paper list with dates, authors and links",
-      why: "The arxiv tool exists but belongs to no agent, so there is nobody to route to." }
+      verdict: "Would work if a research-papers agent existed. Today the orchestrator has nobody to route this to, so it fails or guesses.",
+      okVerdict: "Works here: a team member's agent holds the arxiv tool, so the gap closes.",
+      people: { asker: "tc", chain: [{ agent: "ta", tool: "arxiv", does: "searches arXiv",
+        call: "search_papers(query=\"all:\\\"conformal prediction\\\" AND all:routing\")", result: "paper list with abstracts · source arXiv API" }] } }) },
+    { id: "q12", kind: "proposed", text: "Collect this week's news on container shipping rates and turn it into a demand signal for retailers.", script: chainScript({
+      text: "Collect this week's news on container shipping rates and turn it into a demand signal for retailers.", tag: "needs proposed agents",
+      chain: [{ agent: "collector", tool: "Source A", does: "would collect dated items from its sources",
+        call: "collect(sources=[\"Source A\", \"Source B\"], topic=\"container shipping rates\", since=\"7 days\")", result: "dated, linked items · Source A and Source B (placeholders)" },
+        { agent: "signals", does: "would score the items and build one dated signal", call: "compile(items) → one signal, with its inputs listed", result: "one dated signal with the items behind it · not validated" }],
+      answer: "a dated signal, the items behind it, and a warning that it is unvalidated",
+      verdict: "Would work if a web collector and a signal compiler existed. Neither is built, and Source A to C are placeholders.",
+      people: { asker: "tb", verdict: "Illustration only: we do not know what this agent can do. The asker's agent would have to compile the signal itself.",
+        chain: [{ agent: "cm", does: "would collect from the web: its tools are not known to us", call: "collect(topic=\"container shipping rates\")", result: "collected items (illustrative)" }] } }) },
+    { id: "q13", kind: "proposed", text: "Is the rise in NKE's inventory unusual against its own history?", script: chainScript({
+      text: "Is the rise in NKE's inventory unusual against its own history?", tag: "needs proposed agents",
+      chain: [{ agent: "filings", tool: "edgartools", does: "reads inventory and revenue by quarter",
+        call: "edgar_trends(identifier=\"NKE\", concepts=[\"Inventory\", \"Revenue\"])", result: "inventory and revenue by quarter, with periods · source 10-Q and 10-K" },
+        { agent: "analysis", tool: "statistics", does: "would measure how far the latest quarter sits from its history",
+          call: "zscore(inventory / revenue, window=\"all quarters\")", result: "distance of the latest quarter from its history, with the method" },
+        { agent: "sme", does: "would read the result as a retail-sector expert, from skills alone", call: "skills: sector · accounts", result: "what usually drives inventory builds in apparel, and what to check next" }],
+      answer: "the statistic with its method and sources, plus the expert's reading, labelled as judgement",
+      verdict: "The Filings step works today. The data-analysis agent and the subject expert are proposals with no card.",
+      people: { asker: "tc", verdict: "The filings step works. The mentor's agent is an illustration only: we do not know what it can do.",
+        chain: [{ agent: "td", tool: "edgartools", does: "reads inventory and revenue by quarter", call: "edgar_trends(identifier=\"NKE\", concepts=[\"Inventory\", \"Revenue\"])", result: "inventory and revenue by quarter, with periods · source 10-Q and 10-K" },
+          { agent: "mb", does: "would give a domain reading: its tools are not known to us", call: "interpret(result)", result: "a domain reading (illustrative)" }] } }) },
+    { id: "q14", kind: "proposed", text: "How much of the book is in energy names, by weight?", script: chainScript({
+      text: "How much of the book is in energy names, by weight?", tag: "needs a missing agent",
+      chain: [{ agent: "positions", does: "would read the positions book: no such data exists here", call: "weights(group_by=\"sector\", as_of=<date>)", result: "sector weights with an as-of date · source: positions book (missing)" }],
+      answer: "the energy weight with its as-of date",
+      verdict: "Would work if a positions agent and its data existed. This is the agent the oil-exposure question should have reached.",
+      people: { asker: "te", verdict: "Nobody's agent holds the positions data, so this has nowhere real to go.",
+        chain: [{ agent: "positions", does: "would read the positions book: nobody holds this data", call: "weights(group_by=\"sector\", as_of=<date>)", result: "sector weights with an as-of date (missing)" }] } }) },
+    { id: "q15", kind: "proposed", text: "What did we conclude about the momentum strategy at last month's research meeting?", script: chainScript({
+      text: "What did we conclude about the momentum strategy at last month's research meeting?", tag: "needs a missing agent",
+      chain: [{ agent: "docs", does: "would search the meeting notes: nothing is built", call: "search_notes(query=\"momentum strategy\", month=<last month>)", result: "the relevant note, quoted, with its date" }],
+      answer: "the conclusion, quoted from the note, with its date",
+      verdict: "Would work if an internal-documents agent existed. Nothing is built and there is no document store.",
+      people: { asker: "ta", verdict: "Illustration only: we do not know what the mentors' or the sponsor's agents can do.",
+        chain: [{ agent: "ma", does: "would know where the notes live: its tools are not known to us", call: "lookup(\"research meeting notes\")", result: "a pointer to the sponsor's own agents (illustrative)" },
+          { agent: "gr", does: "would search the notes: these agents are not known to us", call: "search_notes(query=\"momentum strategy\")", result: "the relevant note (illustrative)" }] } }) }
   ];
 
   var state = { tab: "siloed", q: "q1", animate: false, run: 0 };
@@ -357,7 +402,6 @@ code { font: 12.5px var(--mono); }
       });
       add({ id: "gate", cls: "hole", name: "Where do detectors sit?", lines: ["no shared checkpoint"], center: true, x: 600, y: 380, w: 300, h: 60 });
       add({ id: "model", cls: "idea", name: "Which model runs each agent?", lines: ["LLM · Jev · d1 / text diffusion"], center: true, x: 600, y: 300, w: 300, h: 56 });
-      add({ id: "stat", cls: "idea", name: "Statistical guarantees ?", lines: ["confidence gate · placement open"], center: true, x: 600, y: 458, w: 300, h: 54 });
       return;
     }
     add({ id: "req", cls: "", name: "Requester", lines: [], center: true, x: 120, y: 70, w: 160, h: 48 });
@@ -368,7 +412,7 @@ code { font: 12.5px var(--mono); }
     DESK.forEach(function (a, i) { add({ id: a.id, cls: "", name: a.name, lines: a.tools, chips: true, x: 105 + i * 198, y: 356, w: 172, h: 104 }); });
     ROW2.forEach(function (a, i) { add({ id: a.id, cls: a.cls, name: a.name, lines: a.lines, chips: !!a.chips, x: 96 + i * 168, y: tab === "peer" ? 650 : 540, w: 156, h: 122 }); });
     add({ id: "model", cls: "idea", name: "Which model routes?", lines: ["keyword · LLM · Jev · d1 / text diffusion"], center: true, x: 985, y: 70, w: 330, h: 70 });
-    add({ id: "stat", cls: "idea", name: "Statistical guarantees ?", lines: ["confidence gate · placement open"], center: true, x: 170, y: 184, w: 270, h: 54 });
+
   }
 
   function deskIdx(id) { for (var i = 0; i < DESK.length; i++) if (DESK[i].id === id) return i; return -1; }
@@ -413,6 +457,7 @@ code { font: 12.5px var(--mono); }
     if (tab === "peer") s.push(msg("filings", "news", "does not know, but knows who does, and hands it on", "gap", false, "refer: \"not mine; you hold call transcripts\""));
     else {
       s.push(msg("filings", "orch", "declines and names the agent that knows", "gap", true, "OUT_OF_PROFILE: \"I don't know, but the News agent does: it holds call transcripts.\""));
+      if (tab === "siloed") s.push(note("gate", "the self-report detector would catch this refusal here, if it were on the wire", "gap", "self_report → OUT_OF_PROFILE seen"));
       s.push(msg("orch", "news", "re-routes on the referral", "ok", true, "route → " + Q));
     }
     s.push(tool("news", "news", "reads the transcript and filters for margins", "ok", call));
@@ -427,6 +472,7 @@ code { font: 12.5px var(--mono); }
     if (tab === "people") {
       var me = "te", h = HOLDER.alphavantage;
       s.push(note(me, PERSON[me] + " asks their own agent", "ok", Q));
+      s.push(note("model", "whichever model runs this agent has to resolve \"it\" from the earlier thread", "gap", "resolve(\"it\", \"the level we discussed\") from context"));
       s.push(note(me, "has the earlier conversation, so it fills in the instrument and the level", "ok", "context: earlier thread → instrument and level known"));
       s.push(msg(me, h, "asks for the latest price, with the instrument named", "ok", false, "need: latest price for <instrument>, with its date"));
       s.push(tool(h, "alphavantage", "fetches the latest quote", "ok", "TOOL_CALL(\"GLOBAL_QUOTE\", symbol=<instrument>)"));
@@ -436,6 +482,7 @@ code { font: 12.5px var(--mono); }
         verdict: "Works here: the asker's own agent holds the earlier conversation, so it can fill in what the message leaves out." };
     }
     s.push(msg("req", "orch", "asks the question", "ok", true, Q));
+    s.push(note("model", "the router model has only these words to choose from", "gap", "choose(agent | \"it\", \"the level we discussed\") → no clear match"));
     if (tab === "second") {
       s.push(note("stat", "the router's confidence is too low to route", "gap", "confidence below threshold (threshold not calibrated)"));
       s.push(msg("orch", "req", "asks instead of guessing", "gap", true, "\"I don't know which instrument or level you mean. Which are they?\""));
@@ -448,6 +495,73 @@ code { font: 12.5px var(--mono); }
     s.push(msg("orch", "req", "passes the plausible answer on", "bad", true, "\"Yes, it is above.\" (instrument and level both guessed)"));
     return { S: s, kind: "limited", tag: "limited context", wrong: ["market"], should: [],
       verdict: "Limited context: the request names no instrument and no level. Nothing in the message lets the router choose, so it guesses, and the answer still reads as plausible." };
+  }
+
+  function signoffScript(tab) {
+    var Q = "\"Approve the desk's pending TSLA trade.\"", s = [], call = "screen_name(name=\"<counterparty>\")";
+    if (tab === "people") {
+      var me = "tb", c = HOLDER.sanctions;
+      s.push(note(me, PERSON[me] + " asks their own agent", "ok", Q));
+      s.push(msg(me, c, "asks the agent that holds the compliance tools", "ok", false, Q));
+      s.push(tool(c, "sanctions", "screens the counterparty", "ok", call));
+      s.push(note("gate", "an approval needs a person, and there is no shared checkpoint to send it to", "gap", "defer → ? (no reviewer, no gate)"));
+      s.push(msg(c, me, "returns the screening and says it cannot approve", "gap", false, "\"Screening done. I can't approve: that needs a person.\""));
+      s.push(note(me, "tells " + PERSON[me] + " a person must sign off", "gap", "screening result + \"needs human sign-off\""));
+      return { S: s, kind: "proposed", tag: "needs a person", wrong: [], should: [],
+        verdict: "The screening works. Nothing here can hand an approval to a person: there is no gate and no reviewer." };
+    }
+    s.push(msg("req", "orch", "asks for an approval", "ok", true, Q));
+    s.push(msg("orch", "compliance", "routes the request", "ok", true, "route → " + Q));
+    s.push(tool("compliance", "sanctions", "screens the counterparty", "ok", call));
+    s.push(msg("compliance", "orch", "returns the screening and says it cannot approve alone", "ok", true, "\"Screening done. Approval needs a human sign-off.\""));
+    s.push(note("gate", tab === "second" ? "the checker sees a request that needs a person" : "the deferral gate would send this to a person, if it were on the wire", "gap", "defer(reason=\"approval needs a person\")"));
+    s.push(msg("orch", "human", "would hand it to a reviewer: none exists", "gap", true, "screening result + request for sign-off"));
+    s.push(msg("orch", "req", "says it is waiting for sign-off", "gap", true, "\"Screened. Waiting for a person to approve.\""));
+    return { S: s, kind: "proposed", tag: "needs a person", wrong: [], should: [],
+      verdict: "The screening works today. Handing the approval to a person needs a deferral gate and a reviewer, and neither is built." };
+  }
+
+  function chainScript(d) {
+    return function (tab) {
+      var Q = "\"" + short(d.text, 70) + "\"", s = [], people = tab === "people", chain = people ? d.people.chain : d.chain,
+        me = people ? d.people.asker : null, last = chain[chain.length - 1];
+      function real(id) {
+        if (id === "orch" || id === "req") return true;
+        if (!people) return deskIdx(id) > -1;
+        for (var i = 0; i < PEOPLE.length; i++) if (PEOPLE[i].id === id) return !!PEOPLE[i].tools;
+        return false;
+      }
+      function tn(a, b) { return real(a) && real(b) ? "ok" : "gap"; }
+      function work(x) { s.push(x.tool ? tool(x.agent, x.tool, x.does, tn(x.agent, x.agent), x.call) : note(x.agent, x.does, tn(x.agent, x.agent), x.call)); }
+      if (people) {
+        var prev = me;
+        s.push(note(me, PERSON[me] + " asks their own agent", "ok", Q));
+        chain.forEach(function (x, i) {
+          s.push(msg(prev, x.agent, i === 0 ? "asks the agent that would hold this" : "hands on what it has", tn(prev, x.agent), false, i === 0 ? Q : chain[i - 1].result));
+          work(x); prev = x.agent;
+        });
+        s.push(msg(last.agent, me, "returns its result", tn(last.agent, me), false, last.result));
+        s.push(note(me, "answers " + PERSON[me], "ok", d.answer));
+      } else {
+        s.push(msg("req", "orch", "asks the question", "ok", true, Q));
+        if (tab === "peer") {
+          var p = "orch";
+          chain.forEach(function (x, i) {
+            s.push(msg(p, x.agent, i === 0 ? "routes the request" : "hands its result straight to the next agent", tn(p, x.agent), i === 0, i === 0 ? "route → " + Q : chain[i - 1].result));
+            work(x); p = x.agent;
+          });
+          s.push(msg(last.agent, "orch", "returns the result", tn(last.agent, "orch"), true, last.result));
+        } else chain.forEach(function (x, i) {
+          s.push(msg("orch", x.agent, i === 0 ? "routes the request" : "relays the previous result with the request", tn("orch", x.agent), true, i === 0 ? "route → " + Q : "route → request + previous result"));
+          work(x);
+          s.push(msg(x.agent, "orch", "returns its result", tn(x.agent, "orch"), true, x.result));
+        });
+        s.push(msg("orch", "req", "returns the answer", "ok", true, d.answer));
+      }
+      var allReal = chain.every(function (x) { return real(x.agent); });
+      return { S: s, kind: allReal ? "clean" : "proposed", tag: allReal ? "clean" : d.tag, wrong: [], should: [],
+        verdict: allReal ? d.okVerdict : people ? d.people.verdict : d.verdict };
+    };
   }
 
   function steps(q, tab) {
@@ -583,16 +697,45 @@ code { font: 12.5px var(--mono); }
         el("path", { "class": "edge peer", d: pathD(tab, DESK[i].id, DESK[j].id) }, layers.edges);
       el("path", { "class": "edge stub", d: "M" + P.gate.x + "," + P.gate.y + " L" + P.human.x + "," + P.human.y }, layers.edges);
       el("path", { "class": "edge peer", d: "M" + P.orch.x + "," + P.orch.y + " L" + P.model.x + "," + P.model.y }, layers.edges);
-      el("path", { "class": "edge peer", d: "M" + P.stat.x + "," + P.stat.y + " L" + P.gate.x + "," + P.gate.y }, layers.edges);
       el("text", { x: 600, y: tab === "peer" ? 572 : 462, "text-anchor": "middle", "class": "note" }, layers.top,
         "second row: proposed agents (dotted) and missing ones (dashed) · Source A to C are placeholders");
     }
     NODES.forEach(drawNode);
+    // statistical checks: circles on the wires, placement open
+    if (tab === "people") {
+      var hold = PEOPLE.filter(function (p) { return p.tools; });
+      for (i = 0; i < hold.length; i++) for (j = i + 1; j < hold.length; j++)
+        {
+          var A = P[hold[i].id], B = P[hold[j].id], spots = [0.5, 0.4, 0.6, 0.32, 0.68, 0.25, 0.75], k, placed = false;
+          for (k = 0; k < spots.length && !placed; k++) {
+            var sx = A.x + (B.x - A.x) * spots[k], sy = A.y + (B.y - A.y) * spots[k];
+            var clear = NODES.every(function (n) { return Math.abs(sx - n.x) > n.w / 2 + 18 || Math.abs(sy - n.y) > n.h / 2 + 18; });
+            if (clear) { statDot(sx, sy); placed = true; }
+          }
+        }
+    } else {
+      statDot(335, 70, null, "answer valid?", "below");
+      statDot(600, 131, "n-stat", "route right?", "right");
+      DESK.forEach(function (a, k) {
+        var y0 = P.gate.y + P.gate.h / 2, y1 = P[a.id].y - P[a.id].h / 2;
+        statDot(P.gate.x + (P[a.id].x - P.gate.x) * 0.62, y0 + (y1 - y0) * 0.62, null, k === DESK.length - 1 ? "data valid?" : "", "right");
+      });
+    }
+  }
+
+  function statDot(x, y, id, label, side) {
+    var g = el("g", { "class": "node stat" }, layers.top);
+    if (id) g.setAttribute("id", id);
+    el("circle", { "class": "box", cx: x, cy: y, r: 13 }, g);
+    el("path", { "class": "bell", d: "M" + (x - 8) + "," + (y + 5) + " C" + (x - 3) + "," + (y + 5) + " " + (x - 4) + "," + (y - 7) + " " + x + "," + (y - 7) + " C" + (x + 4) + "," + (y - 7) + " " + (x + 3) + "," + (y + 5) + " " + (x + 8) + "," + (y + 5) }, g);
+    if (label) el("text", side === "below" ? { x: x, y: y + 30, "text-anchor": "middle", "class": "sub" } : { x: x + 19, y: y + 4, "class": "sub" }, g, label);
   }
 
   // ---------- panels ----------
   function hopText(st) {
     if (st.toolOf) return LABEL[st.toolOf] + " ⚙ " + st.tool;
+    if (st.at === "gate" && state.tab !== "second") return state.tab === "people" ? "Detectors (no place for them)" : "Detectors (not on this wire)";
+    if (st.at === "model" && state.tab === "people") return "Agent's model";
     if (st.at) return LABEL[st.at];
     return LABEL[st.from] + " → " + LABEL[st.to];
   }
