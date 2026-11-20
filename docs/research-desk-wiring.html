@@ -2,11 +2,11 @@
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Space+Grotesk:wght@500;600&display=swap">
 <style>
-/* Layout: a patch-panel wiring diagram, full width, with the query list and the trace underneath it. */
+/* Layout: a patch-panel wiring diagram, full width, with a console of the messages under it, then the query list and overview. */
 :root {
   --bg: #edf0f3; --surface: #ffffff; --ink: #14202b; --muted: #5a6875; --line: #b9c3cd;
   --accent: #1456c8; --accent-soft: #dce7fa; --bad: #b4321a; --bad-soft: #f8e1da;
-  --gap: #8a6a00; --gap-soft: #fbf1cf;
+  --gap: #8a6a00; --gap-soft: #fbf1cf; --console: #f6f8fa;
   --display: "Space Grotesk", "IBM Plex Sans", system-ui, sans-serif;
   --body: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
   --mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
@@ -15,17 +15,17 @@
   :root:not([data-theme="light"]) {
     --bg: #0f151b; --surface: #18212a; --ink: #e4eaf0; --muted: #94a3b1; --line: #3a4855;
     --accent: #7fb0ff; --accent-soft: #1b3157; --bad: #ff8a70; --bad-soft: #4a2018;
-    --gap: #e5be4a; --gap-soft: #3a3010; color-scheme: dark;
+    --gap: #e5be4a; --gap-soft: #3a3010; --console: #121a22; color-scheme: dark;
   }
 }
 :root[data-theme="dark"] {
   --bg: #0f151b; --surface: #18212a; --ink: #e4eaf0; --muted: #94a3b1; --line: #3a4855;
   --accent: #7fb0ff; --accent-soft: #1b3157; --bad: #ff8a70; --bad-soft: #4a2018;
-  --gap: #e5be4a; --gap-soft: #3a3010; color-scheme: dark;
+  --gap: #e5be4a; --gap-soft: #3a3010; --console: #121a22; color-scheme: dark;
 }
 * { box-sizing: border-box; }
 body { background: var(--bg); color: var(--ink); font: 15px/1.5 var(--body); }
-.wrap { max-width: 1180px; margin: 0 auto; padding-block: 28px 56px;
+.wrap { max-width: 1440px; margin: 0 auto; padding-block: 28px 56px;
   padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
   display: flex; flex-direction: column; gap: 20px; }
 h1 { font: 600 30px/1.15 var(--display); margin: 0; text-wrap: balance; letter-spacing: -0.01em; }
@@ -41,7 +41,7 @@ header { display: flex; flex-direction: column; gap: 8px; }
   border-radius: 6px; padding: 9px 14px; cursor: pointer; }
 .tab[aria-selected="true"] { background: var(--ink); color: var(--bg); border-color: var(--ink); }
 .tab:focus-visible, button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-.tabnote { max-width: 76ch; }
+.tabnote { max-width: 86ch; }
 .tabnote strong { font-weight: 600; }
 .built { font: 12px/1.4 var(--mono); padding: 2px 7px; border-radius: 4px; white-space: nowrap; }
 .built.yes { background: var(--accent-soft); color: var(--accent); }
@@ -60,38 +60,56 @@ header { display: flex; flex-direction: column; gap: 8px; }
 .legend span { display: inline-flex; align-items: center; gap: 6px; }
 .key { width: 22px; height: 12px; border-radius: 3px; flex: none; }
 .key.real { border: 1.5px solid var(--ink); background: var(--surface); }
+.key.idea { border: 1.5px dotted var(--muted); background: var(--surface); }
 .key.hole { border: 1.5px dashed var(--gap); background: var(--gap-soft); }
 .key.wrong { border: 1.5px solid var(--bad); background: var(--bad-soft); }
-.now { min-height: 44px; padding: 10px 14px; border-bottom: 1px solid var(--line); font-size: 14px; display: flex; align-items: center; gap: 10px; }
+.now { min-height: 46px; padding: 10px 14px; border-bottom: 1px solid var(--line); font-size: 15px; display: flex; align-items: center; gap: 10px; }
 .now .q { font-weight: 500; min-width: 0; }
-.now .tag { flex: none; }
+.now .tag { flex: none; margin-left: 0; }
 .scroll { overflow-x: auto; }
-svg#net { display: block; width: 100%; min-width: 880px; height: auto; }
+svg#net { display: block; width: 100%; min-width: 1000px; height: auto; }
 
 /* diagram */
-.edge { fill: none; stroke: var(--line); stroke-width: 1.3; }
-.edge.peer { stroke-dasharray: 2 4; }
+.edge { fill: none; stroke: var(--line); stroke-width: 1.4; }
+.edge.peer { stroke-dasharray: 2 5; }
 .edge.stub { stroke: var(--gap); stroke-dasharray: 5 5; }
-.trail { fill: none; stroke: var(--accent); stroke-width: 2.6; stroke-linecap: round; }
+.trail { fill: none; stroke: var(--accent); stroke-width: 3; stroke-linecap: round; }
 .trail.bad { stroke: var(--bad); }
-.trail.gap { stroke: var(--gap); stroke-dasharray: 6 5; }
-.node .box { fill: var(--surface); stroke: var(--ink); stroke-width: 1.4; }
+.trail.gap { stroke: var(--gap); stroke-dasharray: 7 6; }
+.node .box { fill: var(--surface); stroke: var(--ink); stroke-width: 1.5; }
 .node.hub .box { fill: var(--ink); }
 .node.hub .name, .node.hub .sub { fill: var(--bg); }
-.node.hole .box { fill: var(--gap-soft); stroke: var(--gap); stroke-dasharray: 6 5; }
+.node.idea .box { stroke: var(--muted); stroke-dasharray: 2 4; }
+.node.hole .box { fill: var(--gap-soft); stroke: var(--gap); stroke-dasharray: 7 5; }
 .node.hole .name, .node.hole .sub { fill: var(--gap); }
-.node.active .box { stroke: var(--accent); stroke-width: 2.6; }
-.node.wrong .box { stroke: var(--bad); stroke-width: 2.6; fill: var(--bad-soft); }
-.node.should .box { stroke: var(--gap); stroke-width: 2.6; }
-.node .name { font: 600 13px var(--body); fill: var(--ink); }
-.node .sub { font: 10px var(--mono); fill: var(--muted); }
-.node .tool { font: 9.8px var(--mono); fill: var(--ink); }
+.node.active .box { stroke: var(--accent); stroke-width: 3.2; stroke-dasharray: none; }
+.node.wrong .box { stroke: var(--bad); stroke-width: 3; fill: var(--bad-soft); stroke-dasharray: none; }
+.node.should .box { stroke: var(--gap); stroke-width: 3; }
+.node .name { font: 600 15.5px var(--body); fill: var(--ink); }
+.node .sub { font: 11.5px var(--mono); fill: var(--muted); }
+.node .tool { font: 11.5px var(--mono); fill: var(--ink); }
 .node .chip { fill: var(--bg); stroke: none; }
-.node .chip.on { fill: var(--accent-soft); stroke: var(--accent); stroke-width: 1.2; }
-.packet { fill: var(--accent); stroke: var(--surface); stroke-width: 2; }
+.node .chip.on { fill: var(--accent-soft); stroke: var(--accent); stroke-width: 1.3; }
+.packet { fill: var(--accent); stroke: var(--surface); stroke-width: 2.5; }
 .packet.bad { fill: var(--bad); }
 .packet.gap { fill: var(--gap); }
-.note { font: 11px var(--mono); fill: var(--gap); }
+.float rect { fill: var(--surface); stroke: var(--accent); stroke-width: 1.3; }
+.float.bad rect { stroke: var(--bad); }
+.float.gap rect { stroke: var(--gap); }
+.float text { font: 12px var(--mono); fill: var(--ink); }
+.note { font: 12px var(--mono); fill: var(--gap); }
+
+.console { background: var(--console); border-top: 1px solid var(--line); padding: 10px 14px 12px; font: 13px/1.55 var(--mono);
+  max-height: 290px; overflow-y: auto; display: flex; flex-direction: column; gap: 2px; }
+.console .head { color: var(--muted); }
+.console .row { display: grid; grid-template-columns: 26px minmax(0, 250px) minmax(0, 1fr); gap: 10px; }
+.console .row .n { color: var(--muted); font-variant-numeric: tabular-nums; }
+.console .row .hop { color: var(--accent); min-width: 0; }
+.console .row .pl { min-width: 0; overflow-wrap: anywhere; }
+.console .row.bad .hop, .console .row.bad .pl { color: var(--bad); }
+.console .row.gap .hop, .console .row.gap .pl { color: var(--gap); }
+.console .cursor { color: var(--muted); }
+@media (max-width: 640px) { .console .row { grid-template-columns: 26px minmax(0, 1fr); } .console .row .pl { grid-column: 2; } }
 
 .below { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 20px; }
 @media (max-width: 760px) { .below { grid-template-columns: minmax(0, 1fr); } h1 { font-size: 25px; } .legend { margin-left: 0; } }
@@ -133,15 +151,16 @@ code { font: 12.5px var(--mono); }
 
 <div class="wrap">
   <header>
-    <p class="status">DRAFT · 19 NOV 2026 · EXAMPLE DESK, NOT A TEAM DECISION</p>
+    <p class="status">DRAFT · 20 NOV 2026 · EXAMPLE DESK, NOT A TEAM DECISION</p>
     <h1>Research Desk Wiring</h1>
-    <p class="lede">One orchestrator, six specialist agents and eleven tool servers, drawn three ways. Solid boxes are built and tested. Dashed boxes are holes: things the desk needs and does not have. The query traces are scripted illustrations of how a request would travel. None is a recording of a real run.</p>
+    <p class="lede">One orchestrator, six specialist agents and eleven tool servers, drawn four ways. Solid boxes are built and tested, dotted boxes are proposals, and dashed amber boxes are holes: things the desk needs and does not have. The traces are scripted illustrations of how a request would travel. None is a recording of a real run, and results are described, never given as figures.</p>
   </header>
 
   <div class="tabs" role="tablist" aria-label="Org structure">
     <button class="tab" role="tab" id="tab-siloed" data-tab="siloed">Siloed hierarchy</button>
     <button class="tab" role="tab" id="tab-peer" data-tab="peer">Hierarchy with peer links</button>
-    <button class="tab" role="tab" id="tab-diffuse" data-tab="diffuse">Diffuse</button>
+    <button class="tab" role="tab" id="tab-people" data-tab="people">One agent per person</button>
+    <button class="tab" role="tab" id="tab-second" data-tab="second">Second opinion</button>
   </div>
   <p class="tabnote" id="tabnote"></p>
 
@@ -150,12 +169,14 @@ code { font: 12.5px var(--mono); }
       <button class="switch" role="switch" id="animate" aria-checked="false"><span class="track"></span>Animate queries</button>
       <div class="legend">
         <span><i class="key real"></i>Built and tested</span>
+        <span><i class="key idea"></i>Proposed</span>
         <span><i class="key hole"></i>Hole</span>
         <span><i class="key wrong"></i>Misrouted</span>
       </div>
     </div>
-    <div class="now" id="now" aria-live="polite"></div>
-    <div class="scroll"><svg id="net" viewBox="0 0 1100 600" role="img" aria-labelledby="nettitle"><title id="nettitle">Network of agents and their tools</title></svg></div>
+    <div class="now" id="now"></div>
+    <div class="scroll"><svg id="net" viewBox="0 0 1200 720" role="img" aria-labelledby="nettitle"><title id="nettitle">Network of agents and their tools</title></svg></div>
+    <div class="console" id="console" aria-live="polite" aria-label="Messages sent"></div>
   </section>
 
   <div class="below">
@@ -164,7 +185,7 @@ code { font: 12.5px var(--mono); }
       <div class="queries" id="queries"></div>
     </div>
     <div class="panel">
-      <h3>Trace</h3>
+      <h3>Overview</h3>
       <ol class="trace" id="trace"></ol>
       <div class="verdict" id="verdict"></div>
     </div>
@@ -187,14 +208,14 @@ code { font: 12.5px var(--mono); }
         <li><b>Backtest on real prices</b><span>The runner passes offline tests only.</span></li>
       </ul></div>
       <div class="holegroup"><h3>Detection and control</h3><ul>
-        <li><b>Detectors in the graph</b><span>Four exist in code (capability-profile check, contrastive output, self-report, tool-call). None sits on any wire drawn here.</span></li>
+        <li><b>Detectors in the graph</b><span>Four exist in code (capability-profile check, contrastive output, self-report, tool-call). None sits on a wire that runs.</span></li>
         <li><b>Gate and calibration</b><span>Nothing decides between "route it" and "ask a human", and no threshold is calibrated.</span></li>
-        <li><b>Peer links and diffuse wiring</b><span>Drawn, not built. The repo does one hop: router to one specialist.</span></li>
+        <li><b>Three of the four wirings</b><span>Peer links, one agent per person and second opinion are drawn, not built. The repo does one hop: router to one specialist.</span></li>
         <li><b>A decision model as router</b><span>Jev or an open equivalent has not been tried against the keyword and LLM routers.</span></li>
       </ul></div>
       <div class="holegroup"><h3>Evidence</h3><ul>
         <li><b>A real model run</b><span>No model key is set, so no agent has used these tools with a real model.</span></li>
-        <li><b>A real request set</b><span>Ten sample requests. Demo scores are a plumbing check, not a result.</span></li>
+        <li><b>A real request set</b><span>Twelve sample requests. Demo scores are a plumbing check, not a result.</span></li>
         <li><b>Traces</b><span>JSONL files only; Langfuse is not wired.</span></li>
         <li><b>The sponsor's own map</b><span>No list of their agents (their agents), and no team decision on direction or use case.</span></li>
       </ul></div>
@@ -202,7 +223,7 @@ code { font: 12.5px var(--mono); }
   </section>
 
   <footer>
-    <p>Agents and tools are read from the repo's cards and <code>.mcp.json</code> as of 19 Nov 2026. The four misroute names quote spec 41 exactly. The misroute examples come from the team discussion on 18 Nov; the three org structures are candidate wirings for the rewiring experiment, not decisions.</p>
+    <p>Agents and tools are read from the repo's cards and <code>.mcp.json</code> as of 20 Nov 2026. The four misroute names quote spec 41 exactly. The misroute examples come from the team discussion on 18 Nov. The four structures are candidate wirings for the rewiring experiment, not decisions, and the split of tools between people is invented for illustration.</p>
   </footer>
 </div>
 
@@ -211,61 +232,99 @@ code { font: 12.5px var(--mono); }
   "use strict";
   var NS = "http://www.w3.org/2000/svg";
   var svg = document.getElementById("net");
-  var W = 1100, NW = 112, NH = 84;
+  var W = 1200;
 
-  var AGENTS = [
+  var DESK = [
     { id: "market", name: "Market data", tools: ["alphavantage", "finnhub"] },
     { id: "filings", name: "Filings", tools: ["edgartools", "companies_house"] },
     { id: "news", name: "News", tools: ["news"] },
-    { id: "positions", name: "Positions", hole: true, sub: ["no card", "no data"] },
     { id: "macro", name: "Macro", tools: ["fred", "dbnomics"] },
     { id: "backtest", name: "Backtest", tools: ["backtest"] },
-    { id: "papers", name: "Research papers", hole: true, sub: ["arxiv ready", "no card"] },
-    { id: "compliance", name: "Compliance", tools: ["sanctions"] },
-    { id: "docs", name: "Internal docs", hole: true, sub: ["nothing built"] }
+    { id: "compliance", name: "Compliance", tools: ["sanctions"] }
   ];
-  var REAL = AGENTS.filter(function (a) { return !a.hole; }).map(function (a) { return a.id; });
-  var LABEL = { req: "Requester", orch: "Orchestrator" };
-  AGENTS.forEach(function (a) { LABEL[a.id] = a.name; });
+  var DESK_HOLES = [
+    { id: "positions", name: "Positions and portfolio", sub: ["no card, no data"] },
+    { id: "papers", name: "Research papers", sub: ["arxiv ready, no card"] },
+    { id: "docs", name: "Internal documents", sub: ["nothing built"] }
+  ];
+  var PEOPLE = [
+    { id: "ta", name: "Team member A's agent", tools: ["catalogue", "arxiv"] },
+    { id: "tb", name: "Team member B's agent", tools: ["alphavantage", "finnhub", "news"] },
+    { id: "ma", name: "Mentor A's agent", sub: ["sponsor mentor", "tools not known to us"] },
+    { id: "gr", name: "Sponsor's own agents", hole: true, sub: ["not listed", "not known to us"] },
+    { id: "mb", name: "Mentor B's agent", sub: ["sponsor mentor", "tools not known to us"] },
+    { id: "tc", name: "Team member C's agent", tools: ["fred", "dbnomics"] },
+    { id: "td", name: "Team member D's agent", tools: ["edgartools", "backtest"] },
+    { id: "positions", name: "Positions and portfolio", hole: true, sub: ["nobody holds this data"] },
+    { id: "te", name: "Team member E's agent", tools: ["sanctions", "companies_house"] },
+    { id: "cm", name: "Channel member's agent", sub: ["in the channel", "tools not known to us"] }
+  ];
+  var HOLDER = {}, PERSON = {};
+  PEOPLE.forEach(function (p) {
+    if (p.hole || !p.tools) return;
+    PERSON[p.id] = p.name.split("'")[0];
+    p.tools.forEach(function (t) { HOLDER[t] = p.id; });
+  });
+
+  var LABEL = { req: "Requester", orch: "Orchestrator", gate: "Checker", human: "Human reviewer" };
+  DESK.concat(DESK_HOLES, PEOPLE).forEach(function (a) { LABEL[a.id] = a.name; });
 
   var TABS = {
-    siloed: {
-      built: true,
-      note: "<strong>Siloed hierarchy.</strong> Every message goes through the orchestrator, and specialists never talk to each other. A request that needs two agents is relayed by the orchestrator. This is the only wiring the repo runs today, and only for one hop."
-    },
-    peer: {
-      built: false,
-      note: "<strong>Hierarchy with peer links.</strong> The orchestrator still assigns the work, but a specialist can ask another specialist directly. Those exchanges never pass the orchestrator, so a check placed there cannot see them."
-    },
-    diffuse: {
-      built: false,
-      note: "<strong>Diffuse.</strong> No orchestrator. A request lands on whichever agent the requester reaches, each agent holds only its own tools, and agents hand work to each other. No single point sees every message."
-    }
+    siloed: { built: true,
+      note: "<strong>Siloed hierarchy.</strong> Every message goes through the orchestrator, and specialists never talk to each other. A request that needs two agents is relayed by the orchestrator. This is the only wiring the repo runs today, and only for one hop." },
+    peer: { built: false,
+      note: "<strong>Hierarchy with peer links.</strong> The orchestrator still assigns the work, but a specialist can ask another specialist directly. Those exchanges never pass the orchestrator, so a check placed there cannot see them." },
+    people: { built: false,
+      note: "<strong>One agent per person.</strong> No orchestrator. Everyone in the channel has their own agent, and each agent holds only some of the tools. A request starts with the asker's own agent, which asks a colleague's agent when it lacks the tool. Who holds which tool is invented here for illustration, and the mentors' and one other member's agents are shown without tools because we do not know what they hold." },
+    second: { built: false,
+      note: "<strong>Second opinion.</strong> The siloed hierarchy plus a check on the wire. The orchestrator sends each request to the agent it picked and to its runner-up, and a checker compares the two replies. A refusal from the runner-up supports the routing; two different answers go to a person. It is a version of the spec's contrastive output detector. It doubles the work, and it misses a misroute when both agents are wrong in the same way." }
   };
 
   // stages are in dependency order; the last stage's agent owns the answer.
   var QUERIES = [
     { id: "q1", kind: "clean", text: "What was the 10-year treasury yield on the first trading day of each month this year?",
-      stages: [{ agent: "macro", tool: "fred", does: "reads the 10-year yield series, with dates" }], entry: "market" },
+      stages: [{ agent: "macro", tool: "fred", does: "reads the 10-year yield series",
+        call: "fred_get_series(series_id=\"DGS10\", start=\"2026-01-01\")", result: "daily yield series with dates · source FRED DGS10" }],
+      answer: "table of month-start yields, each with its date · source FRED", second: "market", asker: "td" },
     { id: "q2", kind: "clean", text: "Pull the debt maturity schedule from the debt note in MSFT's 10-K and flag anything due within 24 months.",
-      stages: [{ agent: "filings", tool: "edgartools", does: "reads the debt note in the 10-K" }], entry: "filings" },
+      stages: [{ agent: "filings", tool: "edgartools", does: "reads the debt note in the 10-K",
+        call: "edgar_notes(identifier=\"MSFT\", topic=\"debt\")", result: "debt maturity table with note and page · source 10-K" }],
+      answer: "maturity schedule, items due within 24 months flagged · source 10-K note", second: "news", asker: "ta" },
     { id: "q3", kind: "clean", text: "Backtest a 50/200-day moving-average crossover on SPY from 2015 to 2025; report Sharpe and max drawdown.",
-      stages: [{ agent: "market", tool: "alphavantage", does: "fetches adjusted daily closes for SPY, with dates" },
-               { agent: "backtest", tool: "backtest", does: "runs the crossover on the supplied prices" }], entry: "backtest" },
+      stages: [{ agent: "market", tool: "alphavantage", does: "fetches adjusted daily closes for SPY, with dates",
+        need: "need: adjusted daily closes for SPY, 2015 to 2025", call: "TOOL_CALL(\"TIME_SERIES_DAILY_ADJUSTED\", symbol=\"SPY\")",
+        result: "adjusted daily closes with dates · source Alpha Vantage" },
+        { agent: "backtest", tool: "backtest", does: "runs the crossover on the supplied prices",
+          call: "run_sma_crossover(ticker=\"SPY\", fast=50, slow=200, dates, closes)", result: "Sharpe and max drawdown vs buy-and-hold · saved to runs/backtests" }],
+      answer: "Sharpe and max drawdown, with the price source and window", second: "macro", asker: "tc" },
     { id: "q4", kind: "clean", text: "Who are Tesco PLC's directors, and are its latest accounts filed?",
-      stages: [{ agent: "filings", tool: "companies_house", does: "looks up officers and filing history" }], entry: "compliance" },
+      stages: [{ agent: "filings", tool: "companies_house", does: "looks up officers and filing history",
+        call: "company_officers(\"00445790\") + filing_history(category=\"accounts\")", result: "officer list and latest accounts filing date · source Companies House" }],
+      answer: "directors and accounts status, with retrieval time", second: "compliance", asker: "tb" },
     { id: "q5", kind: "clean", text: "Is this counterparty on the US sanctions list?",
-      stages: [{ agent: "compliance", tool: "sanctions", does: "screens the name against the OFAC list" }], entry: "macro" },
+      stages: [{ agent: "compliance", tool: "sanctions", does: "screens the name against the OFAC list",
+        call: "screen_name(name=\"<counterparty>\")", result: "matches or none on the OFAC SDN list, with the list date" }],
+      answer: "match list, with the caveat that a name match is a lead, not clearance", second: "filings", asker: "ta" },
     { id: "q9", kind: "clean", text: "List the main news headlines on NKE over the last 30 days, each with its date and link.",
-      stages: [{ agent: "news", tool: "news", does: "pulls dated, linked headlines" }], entry: "market" },
+      stages: [{ agent: "news", tool: "news", does: "pulls dated, linked headlines",
+        call: "company_news(symbol=\"NKE\", days=30)", result: "dated, linked headlines · source Finnhub" }],
+      answer: "headline list with dates and links", second: "market", asker: "tc" },
     { id: "q6", kind: "misroute", type: "authority mismatch", text: "Can I use this vendor dataset in the live strategy?",
       sentTo: "market", gold: "compliance", wrong: "\"Yes, it's in the store.\"",
+      second: "compliance", secondSays: "\"Needs compliance approval. This one is mine.\"", caught: true,
+      asker: "tb", goldPerson: "te",
       why: "Only the compliance agent may approve. The data agent answered a permission question as if it were a data question." },
     { id: "q7", kind: "misroute", type: "semantic misinterpretation", text: "What's our exposure to oil?",
-      sentTo: "market", gold: "positions", tool: "alphavantage", wrong: "an oil price history",
+      sentTo: "market", gold: "positions", tool: "alphavantage", call: "TOOL_CALL(\"WTI\", interval=\"monthly\")",
+      wrong: "an oil price history · source Alpha Vantage",
+      second: "macro", secondSays: "an oil price series too · source FRED", caught: false,
+      asker: "ta",
       why: "The question is about the desk's own positions. No agent holds them, so the nearest-sounding agent answers a different question." },
     { id: "q8", kind: "hole", text: "Find recent papers on conformal prediction for routing.",
-      gold: "papers", entry: "macro",
+      gold: "papers", asker: "tc",
+      stages: [{ agent: "papers", tool: "arxiv", does: "searches arXiv",
+        call: "search_papers(query=\"all:\\\"conformal prediction\\\" AND all:routing\")", result: "paper list with abstracts · source arXiv API" }],
+      answer: "paper list with dates, authors and links",
       why: "The arxiv tool exists but belongs to no agent, so there is nobody to route to." }
   ];
 
@@ -273,93 +332,135 @@ code { font: 12.5px var(--mono); }
   var reduced = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
   // ---------- geometry ----------
-  function layout(tab) {
-    var p = {};
-    if (tab === "diffuse") {
-      p.req = { x: 96, y: 52, w: 132, h: 40 };
-      p.gate = { x: 550, y: 300, w: 250, h: 56 };
-      p.human = { x: 550, y: 392, w: 150, h: 40 };
-      AGENTS.forEach(function (a, i) {
-        var t = (-90 + i * 40) * Math.PI / 180;
-        p[a.id] = { x: 550 + 400 * Math.cos(t), y: 312 + 218 * Math.sin(t), w: NW, h: NH };
+  var P = {}, NODES = [], layers = {};
+
+  function build(tab) {
+    P = {}; NODES = [];
+    function add(n) { P[n.id] = n; NODES.push(n); }
+    if (tab === "people") {
+      PEOPLE.forEach(function (a, i) {
+        var t = (-90 + i * 360 / PEOPLE.length) * Math.PI / 180;
+        add({ id: a.id, cls: a.hole ? "hole" : "idea", name: a.name, lines: a.tools || a.sub, chips: !!a.tools,
+          x: 600 + 440 * Math.cos(t), y: 380 + 268 * Math.sin(t), w: 190, h: a.tools ? 44 + a.tools.length * 25 : 84 });
       });
-    } else {
-      p.req = { x: 130, y: 62, w: 132, h: 40 };
-      p.orch = { x: 550, y: 62, w: 220, h: 60 };
-      p.gate = { x: 550, y: 168, w: 290, h: 44 };
-      p.human = { x: 960, y: 168, w: 150, h: 40 };
-      AGENTS.forEach(function (a, i) { p[a.id] = { x: 66 + i * 121, y: 330, w: NW, h: NH }; });
+      add({ id: "gate", cls: "hole", name: "Where do detectors sit?", lines: ["no shared checkpoint"], center: true, x: 600, y: 380, w: 300, h: 60 });
+      return;
     }
-    return p;
+    add({ id: "req", cls: "", name: "Requester", lines: [], center: true, x: 120, y: 70, w: 160, h: 48 });
+    add({ id: "orch", cls: "hub", name: "Orchestrator", lines: ["router card · catalogue"], center: true, x: 600, y: 70, w: 260, h: 70 });
+    if (tab === "second") add({ id: "gate", cls: "idea", name: "Checker", lines: ["compares the two replies"], center: true, x: 600, y: 184, w: 330, h: 54 });
+    else add({ id: "gate", cls: "hole", name: "Detectors and deferral gate", lines: ["in code, not on this wire"], center: true, x: 600, y: 184, w: 330, h: 54 });
+    add({ id: "human", cls: "hole", name: "Human reviewer", lines: ["not built"], center: true, x: 1060, y: 184, w: 180, h: 54 });
+    DESK.forEach(function (a, i) { add({ id: a.id, cls: "", name: a.name, lines: a.tools, chips: true, x: 105 + i * 198, y: 356, w: 172, h: 104 }); });
+    DESK_HOLES.forEach(function (a, i) { add({ id: a.id, cls: "hole", name: a.name, lines: a.sub, x: 300 + i * 300, y: tab === "peer" ? 628 : 516, w: 220, h: 70 }); });
   }
 
-  function pathD(tab, P, a, b) {
+  function deskIdx(id) { for (var i = 0; i < DESK.length; i++) if (DESK[i].id === id) return i; return -1; }
+
+  function pathD(tab, a, b) {
     var A = P[a], B = P[b];
-    if (tab !== "diffuse") {
-      if (a === "orch" || b === "orch") {
-        var other = a === "orch" ? b : a, O = P[other];
-        if (other === "req") return "M" + P.req.x + "," + P.req.y + " L" + P.orch.x + "," + P.orch.y;
-        var d = "M" + P.orch.x + "," + P.orch.y + " L" + P.gate.x + "," + (P.gate.y + P.gate.h / 2) + " L" + O.x + "," + (O.y - O.h / 2);
-        return d;
-      }
-      if (a !== "req" && b !== "req") {
-        var ia = idx(a), ib = idx(b), yb = A.y + A.h / 2;
-        return "M" + A.x + "," + yb + " Q" + (A.x + B.x) / 2 + "," + (yb + 34 + Math.abs(ia - ib) * 30) + " " + B.x + "," + yb;
+    if (tab !== "people") {
+      var has = function (x) { return a === x || b === x; }, other = a === "orch" ? b : a;
+      if (has("orch") && has("req")) return "M" + P.req.x + "," + P.req.y + " L" + P.orch.x + "," + P.orch.y;
+      if (has("orch") && has("human")) return "M" + P.orch.x + "," + P.orch.y + " L" + P.gate.x + "," + P.gate.y + " L" + P.human.x + "," + P.human.y;
+      if (has("orch")) return "M" + P.orch.x + "," + P.orch.y + " L" + P.gate.x + "," + (P.gate.y + P.gate.h / 2) + " L" + P[other].x + "," + (P[other].y - P[other].h / 2);
+      if (deskIdx(a) > -1 && deskIdx(b) > -1) {
+        var yb = A.y + A.h / 2;
+        return "M" + A.x + "," + yb + " Q" + (A.x + B.x) / 2 + "," + (yb + 44 + Math.abs(deskIdx(a) - deskIdx(b)) * 30) + " " + B.x + "," + yb;
       }
     }
     return "M" + A.x + "," + A.y + " L" + B.x + "," + B.y;
   }
-  function idx(id) { for (var i = 0; i < AGENTS.length; i++) if (AGENTS[i].id === id) return i; return -1; }
 
   // ---------- scripted steps ----------
-  function msg(from, to, label, tone, seen) { return { from: from, to: to, label: label, tone: tone || "ok", seen: !!seen }; }
-  function tool(agent, name, label, tone) { return { toolOf: agent, tool: name, label: label, tone: tone || "ok" }; }
+  function short(t, n) { return t.length > n ? t.slice(0, n - 1) + "…" : t; }
+  function msg(from, to, label, tone, seen, payload) { return { from: from, to: to, label: label, tone: tone || "ok", seen: !!seen, payload: payload || "" }; }
+  function tool(agent, name, label, tone, payload) { return { toolOf: agent, tool: name, label: label, tone: tone || "ok", payload: payload || "" }; }
+  function note(at, label, tone, payload) { return { at: at, label: label, tone: tone || "ok", payload: payload || "" }; }
 
   function steps(q, tab) {
-    var s = [], hub = tab !== "diffuse";
-    if (q.kind === "clean") {
-      var st = q.stages, owner = st[st.length - 1], deps = st.slice(0, -1);
-      if (tab === "siloed") {
-        s.push(msg("req", "orch", "asks the question", "ok", true));
-        st.forEach(function (x, i) {
-          s.push(msg("orch", x.agent, i === 0 ? "routes the request" : "relays the first result with the request", "ok", true));
-          s.push(tool(x.agent, x.tool, x.does));
-          s.push(msg(x.agent, "orch", "returns its result with source and date", "ok", true));
-        });
-        s.push(msg("orch", "req", "returns the answer", "ok", true));
-      } else {
-        var entry = hub ? "orch" : q.entry;
-        s.push(msg("req", entry, hub ? "asks the question" : "asks the nearest agent", "ok", hub));
-        if (entry !== owner.agent) s.push(msg(entry, owner.agent, hub ? "routes the request" : "hands the request on: not its job", "ok", hub));
-        deps.forEach(function (x) {
-          s.push(msg(owner.agent, x.agent, "asks a peer directly for what it needs", "ok", false));
-          s.push(tool(x.agent, x.tool, x.does));
-          s.push(msg(x.agent, owner.agent, "returns its result with source and date", "ok", false));
-        });
-        s.push(tool(owner.agent, owner.tool, owner.does));
-        if (entry !== owner.agent) s.push(msg(owner.agent, entry, "returns its result with source and date", "ok", hub));
-        s.push(msg(entry, "req", "returns the answer", "ok", hub));
+    var s = [], Q = "\"" + short(q.text, 70) + "\"", st = q.stages || [], owner = st[st.length - 1], deps = st.slice(0, -1);
+
+    if (tab === "people") {
+      var me = q.asker, who = PERSON[me];
+      s.push(note(me, who + " asks their own agent", "ok", Q));
+      if (q.kind === "misroute" && !q.tool) {
+        s.push(note(me, "answers by itself instead of asking a colleague's agent", "bad", q.wrong + " Nothing errors."));
+        return s;
       }
-    } else if (q.kind === "misroute") {
-      if (hub) {
-        s.push(msg("req", "orch", "asks the question", "ok", true));
-        s.push(msg("orch", q.sentTo, "routes to the wrong agent", "bad", true));
-      } else {
-        s.push(msg("req", q.sentTo, "asks the nearest agent, which keeps the request", "bad", false));
+      if (q.kind === "misroute") {
+        var h = HOLDER[q.tool];
+        s.push(msg(me, h, "asks the colleague whose agent sounds closest", "bad", false, Q));
+        s.push(tool(h, q.tool, "calls a tool that answers a different question", "bad", q.call));
+        s.push(msg(h, me, "returns a plausible result", "bad", false, q.wrong));
+        s.push(note(me, "passes it to " + who + ". Nothing errors.", "bad", q.wrong));
+        return s;
       }
-      if (q.tool) s.push(tool(q.sentTo, q.tool, "calls a tool that answers a different question", "bad"));
-      if (hub) {
-        s.push(msg(q.sentTo, "orch", "answers " + q.wrong + " Nothing errors.", "bad", true));
-        s.push(msg("orch", "req", "passes the plausible answer on", "bad", true));
-      } else {
-        s.push(msg(q.sentTo, "req", "answers " + q.wrong + " Nothing errors.", "bad", false));
-      }
-    } else {
-      var e = hub ? "orch" : q.entry;
-      s.push(msg("req", e, hub ? "asks the question" : "asks the nearest agent", "ok", hub));
-      s.push(msg(e, q.gold, "looks for an agent to take it and finds a hole", "gap", hub));
-      s.push(msg(e, "req", "cannot route: says so, or guesses", "gap", hub));
+      var chain = st.map(function (x) { return { h: HOLDER[x.tool], x: x }; }), last = chain[chain.length - 1];
+      if (last.h !== me) s.push(msg(me, last.h, "lacks the tool, so asks the colleague's agent that holds it", "ok", false, Q));
+      chain.slice(0, -1).forEach(function (c) {
+        if (c.h !== last.h) s.push(msg(last.h, c.h, "asks a third agent for an input", "ok", false, c.x.need || Q));
+        s.push(tool(c.h, c.x.tool, c.x.does, "ok", c.x.call));
+        if (c.h !== last.h) s.push(msg(c.h, last.h, "returns its result with source and date", "ok", false, c.x.result));
+      });
+      s.push(tool(last.h, last.x.tool, last.x.does, "ok", last.x.call));
+      if (last.h !== me) s.push(msg(last.h, me, "returns its result with source and date", "ok", false, last.x.result));
+      s.push(note(me, "answers " + who, "ok", q.answer));
+      return s;
     }
+
+    s.push(msg("req", "orch", "asks the question", "ok", true, Q));
+    if (q.kind === "hole") {
+      if (tab === "second") {
+        s.push(msg("orch", "human", "no agent fits, so it asks a person", "gap", true, "defer(reason=\"no agent holds a tool for this\")"));
+        s.push(msg("orch", "req", "says it is with a reviewer", "gap", true, "\"Sent to a reviewer. No answer yet.\""));
+      } else {
+        s.push(msg("orch", q.gold, "looks for an agent to take it and finds a hole", "gap", true, "route → ? (no card lists a papers intent)"));
+        s.push(msg("orch", "req", "cannot route: says so, or guesses", "gap", true, "\"No agent can take this.\""));
+      }
+      return s;
+    }
+    if (q.kind === "misroute") {
+      s.push(msg("orch", q.sentTo, "routes to the wrong agent", "bad", true, "route → " + Q));
+      if (tab === "second") s.push(msg("orch", q.second, "asks the runner-up the same thing", "ok", true, "second opinion → " + Q));
+      if (q.tool) s.push(tool(q.sentTo, q.tool, "calls a tool that answers a different question", "bad", q.call));
+      s.push(msg(q.sentTo, "orch", "answers. Nothing errors.", "bad", true, q.wrong));
+      if (tab !== "second") { s.push(msg("orch", "req", "passes the plausible answer on", "bad", true, q.wrong)); return s; }
+      s.push(msg(q.second, "orch", "replies through the checker", q.caught ? "ok" : "bad", true, q.secondSays));
+      if (q.caught) {
+        s.push(note("gate", "the two replies conflict", "gap", "compare → conflict"));
+        s.push(msg("orch", "human", "hands both replies to a person", "gap", true, "defer(reason=\"replies conflict\")"));
+        s.push(msg("orch", "req", "says it is with a reviewer", "gap", true, "\"Held for review: two agents disagree.\""));
+      } else {
+        s.push(note("gate", "the two replies agree, so nothing is flagged", "bad", "compare → agree"));
+        s.push(msg("orch", "req", "passes the plausible answer on", "bad", true, q.wrong));
+      }
+      return s;
+    }
+    if (tab === "peer") {
+      s.push(msg("orch", owner.agent, "routes the request", "ok", true, "route → " + Q));
+      deps.forEach(function (x) {
+        s.push(msg(owner.agent, x.agent, "asks a peer directly for what it needs", "ok", false, x.need || Q));
+        s.push(tool(x.agent, x.tool, x.does, "ok", x.call));
+        s.push(msg(x.agent, owner.agent, "returns its result with source and date", "ok", false, x.result));
+      });
+      s.push(tool(owner.agent, owner.tool, owner.does, "ok", owner.call));
+      s.push(msg(owner.agent, "orch", "returns its result with source and date", "ok", true, owner.result));
+    } else {
+      st.forEach(function (x, i) {
+        var lastOne = i === st.length - 1;
+        s.push(msg("orch", x.agent, i === 0 ? "routes the request" : "relays the first result with the request", "ok", true,
+          i === 0 ? "route → " + (x.need || Q) : "route → " + short(q.text, 40) + " + prices from step " + (s.length - 1)));
+        if (tab === "second" && lastOne) s.push(msg("orch", q.second, "asks the runner-up the same thing", "ok", true, "second opinion → " + Q));
+        s.push(tool(x.agent, x.tool, x.does, "ok", x.call));
+        s.push(msg(x.agent, "orch", "returns its result with source and date", "ok", true, x.result));
+        if (tab === "second" && lastOne) {
+          s.push(msg(q.second, "orch", "declines: outside its card", "ok", true, "OUT_OF_PROFILE: not one of my intents"));
+          s.push(note("gate", "one answer and one refusal: consistent with the routing", "ok", "compare → consistent"));
+        }
+      });
+    }
+    s.push(msg("orch", "req", "returns the answer", "ok", true, q.answer));
     return s;
   }
 
@@ -372,71 +473,64 @@ code { font: 12.5px var(--mono); }
     return e;
   }
 
-  var P, layers = {};
-
-  function drawNode(id, cls, name, lines, opts) {
-    var n = P[id], g = el("g", { "class": "node " + cls, id: "n-" + id }, layers.nodes);
-    el("rect", { "class": "box", x: n.x - n.w / 2, y: n.y - n.h / 2, width: n.w, height: n.h, rx: 7 }, g);
-    var top = n.y - n.h / 2;
-    if (opts && opts.center) {
-      el("text", { x: n.x, y: n.y + (lines.length ? -3 : 5), "text-anchor": "middle", "class": "name" }, g, name);
-      if (lines.length) el("text", { x: n.x, y: n.y + 14, "text-anchor": "middle", "class": "sub" }, g, lines[0]);
-      return g;
+  function drawNode(n) {
+    var g = el("g", { "class": "node " + n.cls, id: "n-" + n.id }, layers.nodes), top = n.y - n.h / 2, left = n.x - n.w / 2;
+    el("rect", { "class": "box", x: left, y: top, width: n.w, height: n.h, rx: 8 }, g);
+    if (n.center) {
+      el("text", { x: n.x, y: n.y + (n.lines.length ? -3 : 5), "text-anchor": "middle", "class": "name" }, g, n.name);
+      if (n.lines.length) el("text", { x: n.x, y: n.y + 16, "text-anchor": "middle", "class": "sub" }, g, n.lines[0]);
+      return;
     }
-    el("text", { x: n.x - n.w / 2 + 11, y: top + 23, "class": "name" }, g, name);
-    lines.forEach(function (t, i) {
-      var y = top + 36 + i * 21;
-      if (opts && opts.chips) {
-        el("rect", { x: n.x - n.w / 2 + 8, y: y, width: n.w - 16, height: 17, rx: 3, "class": "chip", id: "chip-" + id + "-" + t }, g);
-        el("text", { x: n.x - n.w / 2 + 14, y: y + 12.5, "class": "tool" }, g, t);
-      } else {
-        el("text", { x: n.x - n.w / 2 + 11, y: y + 9, "class": "sub" }, g, t);
-      }
+    el("text", { x: left + 13, y: top + 27, "class": "name" }, g, n.name);
+    n.lines.forEach(function (t, i) {
+      var y = top + 40 + i * 25;
+      if (n.chips) {
+        el("rect", { x: left + 10, y: y, width: n.w - 20, height: 20, rx: 4, "class": "chip", id: "chip-" + n.id + "-" + t }, g);
+        el("text", { x: left + 17, y: y + 14.5, "class": "tool" }, g, t);
+      } else el("text", { x: left + 13, y: y + 9, "class": "sub" }, g, t);
     });
-    return g;
   }
 
   function draw() {
     var tab = state.tab;
-    P = layout(tab);
+    build(tab);
     while (svg.lastChild && svg.lastChild.nodeName !== "title") svg.removeChild(svg.lastChild);
-    svg.setAttribute("viewBox", "0 0 " + W + " " + (tab === "diffuse" ? 640 : 600));
+    svg.setAttribute("viewBox", "0 0 " + W + " " + (tab === "people" ? 780 : tab === "peer" ? 720 : 600));
     layers.edges = el("g", {}, svg); layers.trails = el("g", {}, svg); layers.nodes = el("g", {}, svg); layers.top = el("g", {}, svg);
-
-    if (tab !== "diffuse") {
-      el("path", { "class": "edge", d: pathD(tab, P, "req", "orch") }, layers.edges);
-      REAL.forEach(function (id) { el("path", { "class": "edge", d: pathD(tab, P, "orch", id) }, layers.edges); });
+    var i, j;
+    if (tab === "people") {
+      var real = PEOPLE.filter(function (p) { return !p.hole; });
+      for (i = 0; i < real.length; i++) for (j = i + 1; j < real.length; j++)
+        el("path", { "class": "edge peer", d: pathD(tab, real[i].id, real[j].id) }, layers.edges);
+      el("text", { x: 600, y: 770, "text-anchor": "middle", "class": "note" }, layers.top, "dotted: proposed agents and links · which person holds which tool is invented");
+    } else {
+      el("path", { "class": "edge", d: pathD(tab, "req", "orch") }, layers.edges);
+      DESK.forEach(function (a) { el("path", { "class": "edge", d: pathD(tab, "orch", a.id) }, layers.edges); });
+      if (tab === "peer") for (i = 0; i < DESK.length; i++) for (j = i + 1; j < DESK.length; j++)
+        el("path", { "class": "edge peer", d: pathD(tab, DESK[i].id, DESK[j].id) }, layers.edges);
+      el("path", { "class": "edge stub", d: "M" + P.gate.x + "," + P.gate.y + " L" + P.human.x + "," + P.human.y }, layers.edges);
+      el("text", { x: 600, y: tab === "peer" ? 578 : 466, "text-anchor": "middle", "class": "note" }, layers.top,
+        tab === "peer" ? "dotted arcs above: peer links, drawn but not built · below: agents the desk is missing" : "agents the desk is missing");
     }
-    if (tab !== "siloed") {
-      for (var i = 0; i < REAL.length; i++) for (var j = i + 1; j < REAL.length; j++)
-        el("path", { "class": "edge peer", d: pathD(tab, P, REAL[i], REAL[j]) }, layers.edges);
-    }
-    el("path", { "class": "edge stub", d: tab === "diffuse"
-      ? "M" + P.gate.x + "," + P.gate.y + " L" + P.human.x + "," + P.human.y
-      : "M" + (P.gate.x + P.gate.w / 2) + "," + P.gate.y + " L" + (P.human.x - P.human.w / 2) + "," + P.human.y }, layers.edges);
-
-    drawNode("req", "", "Requester", [], { center: true });
-    if (tab !== "diffuse") drawNode("orch", "hub", "Orchestrator", ["router card · catalogue"], { center: true });
-    drawNode("gate", "hole", tab === "diffuse" ? "Where do detectors sit?" : "Detectors and deferral gate",
-      [tab === "diffuse" ? "no single point sees all messages" : "in code, not on this wire"], { center: true });
-    drawNode("human", "hole", "Human reviewer", ["not built"], { center: true });
-    AGENTS.forEach(function (a) {
-      if (a.hole) drawNode(a.id, "hole", a.name, a.sub, {});
-      else drawNode(a.id, "", a.name, a.tools, { chips: true });
-    });
-    if (tab === "peer") el("text", { x: 550, y: 590, "text-anchor": "middle", "class": "note" }, layers.top, "dotted arcs: peer links, drawn but not built");
-    if (tab === "diffuse") el("text", { x: 550, y: 632, "text-anchor": "middle", "class": "note" }, layers.top, "dotted lines: peer links, drawn but not built");
+    NODES.forEach(drawNode);
   }
 
-  // ---------- trace panel ----------
+  // ---------- panels ----------
   function hopText(st) {
-    return st.toolOf ? LABEL[st.toolOf] + " · tool " + st.tool : LABEL[st.from] + " → " + LABEL[st.to];
+    if (st.toolOf) return LABEL[st.toolOf] + " ⚙ " + st.tool;
+    if (st.at) return LABEL[st.at];
+    return LABEL[st.from] + " → " + LABEL[st.to];
   }
   function currentQ() { for (var i = 0; i < QUERIES.length; i++) if (QUERIES[i].id === state.q) return QUERIES[i]; return QUERIES[0]; }
+  function kindIn(q, tab) { return q.kind === "hole" && tab === "people" ? "clean" : q.kind; }
+  function count(S) { return S.filter(function (x) { return x.from; }).length; }
 
   function renderPanels(S, upto) {
-    var q = currentQ(), ol = document.getElementById("trace");
-    ol.textContent = "";
+    var q = currentQ(), kind = kindIn(q, state.tab), ol = document.getElementById("trace"), con = document.getElementById("console");
+    ol.textContent = ""; con.textContent = "";
+    var head = document.createElement("div"); head.className = "head";
+    head.textContent = "$ send " + JSON.stringify(short(q.text, 90)) + "   # wiring: " + state.tab;
+    con.appendChild(head);
     S.forEach(function (st, i) {
       var li = document.createElement("li");
       if (st.tone !== "ok") li.className = st.tone;
@@ -446,63 +540,96 @@ code { font: 12.5px var(--mono); }
       var h = document.createElement("span"); h.className = "hop"; h.textContent = hopText(st);
       b.appendChild(h); b.appendChild(document.createTextNode(st.label));
       li.appendChild(n); li.appendChild(b); ol.appendChild(li);
+      if (i <= upto) {
+        var row = document.createElement("div"); row.className = "row" + (st.tone !== "ok" ? " " + st.tone : "");
+        [["n", (i < 9 ? "0" : "") + (i + 1)], ["hop", hopText(st)], ["pl", st.payload]].forEach(function (c) {
+          var sp = document.createElement("span"); sp.className = c[0]; sp.textContent = c[1]; row.appendChild(sp);
+        });
+        con.appendChild(row);
+      }
     });
-    var msgs = S.filter(function (x) { return !x.toolOf; }), seen = msgs.filter(function (x) { return x.seen; }).length;
-    var v = document.getElementById("verdict");
-    v.className = "verdict" + (q.kind === "misroute" ? " bad" : q.kind === "hole" ? " gap" : "");
-    v.textContent = "";
-    var head = document.createElement("div");
-    if (q.kind === "clean") head.textContent = "Reaches the right agent in " + msgs.length + " messages.";
-    else if (q.kind === "misroute") head.textContent = "Misroute: " + q.type + ". Should have gone to " + LABEL[q.gold] + (idx(q.gold) > -1 && AGENTS[idx(q.gold)].hole ? ", which does not exist. " : ". ") + q.why;
-    else head.textContent = "Hole: " + q.why;
-    var s2 = document.createElement("div"); s2.className = "seen";
-    s2.textContent = state.tab === "diffuse"
-      ? "No orchestrator: 0 of " + msgs.length + " messages pass a single checkpoint."
-      : "Orchestrator sees " + seen + " of " + msgs.length + " messages.";
-    v.appendChild(head); v.appendChild(s2);
+    if (upto < S.length - 1) { var cur = document.createElement("div"); cur.className = "cursor"; cur.textContent = "…"; con.appendChild(cur); }
+    con.scrollTop = con.scrollHeight;
 
-    var now = document.getElementById("now");
-    now.textContent = "";
-    var t = document.createElement("span"); t.className = "tag " + q.kind; t.textContent = q.kind === "misroute" ? q.type : q.kind === "hole" ? "hole" : "clean";
-    var qq = document.createElement("span"); qq.className = "q";
-    qq.textContent = upto >= 0 && upto < S.length - 1 && state.animate ? hopText(S[upto]) + ": " + S[upto].label : "“" + q.text + "”";
+    var msgs = count(S), seen = S.filter(function (x) { return x.from && x.seen; }).length, base = count(steps(q, "siloed"));
+    var v = document.getElementById("verdict");
+    v.className = "verdict" + (kind === "misroute" ? " bad" : kind === "hole" ? " gap" : "");
+    v.textContent = "";
+    var h1 = document.createElement("div"), goldHole = q.gold && !deskHas(q.gold);
+    if (kind === "clean" && q.kind === "hole") h1.textContent = "Works here: a person's agent holds the arxiv tool, so the hole closes. " + msgs + " messages between agents.";
+    else if (kind === "clean") h1.textContent = "Reaches the right agent in " + msgs + " messages.";
+    else if (kind === "hole") h1.textContent = "Hole: " + q.why + (state.tab === "second" ? " Here the request goes to a person instead of a guess." : "");
+    else {
+      var target = state.tab === "people" && q.goldPerson ? LABEL[q.goldPerson] : LABEL[q.gold];
+      h1.textContent = "Misroute: " + q.type + ". Should have gone to " + target + (goldHole ? ", which does not exist. " : ". ") + q.why;
+      if (state.tab === "second") h1.textContent += q.caught ? " Caught: the runner-up's reply conflicts, so a person decides." : " Missed: both agents answer the same wrong question, so the replies agree.";
+    }
+    var s2 = document.createElement("div"); s2.className = "seen";
+    s2.textContent = state.tab === "people" && msgs === 0 ? "No message leaves " + LABEL[q.asker] + ", so nothing could check it."
+      : state.tab === "people" ? "No orchestrator: 0 of " + msgs + " messages pass a shared checkpoint."
+      : state.tab === "second" ? "Orchestrator sees " + seen + " of " + msgs + " messages. Cost: " + msgs + " messages against " + base + " in the siloed hierarchy."
+      : "Orchestrator sees " + seen + " of " + msgs + " messages.";
+    v.appendChild(h1); v.appendChild(s2);
+
+    var now = document.getElementById("now"); now.textContent = "";
+    var t = document.createElement("span"); t.className = "tag " + kind; t.textContent = kind === "misroute" ? q.type : kind;
+    var qq = document.createElement("span"); qq.className = "q"; qq.textContent = "“" + q.text + "”";
     now.appendChild(t); now.appendChild(qq);
   }
+  function deskHas(id) { return deskIdx(id) > -1; }
 
+  function cls(id, c) { var n = document.getElementById(id); if (n) n.classList.add(c); }
   function mark(q) {
     ["wrong", "should", "active"].forEach(function (c) {
       Array.prototype.forEach.call(svg.querySelectorAll(".node." + c), function (n) { n.classList.remove(c); });
     });
-    if (q.kind === "misroute") { cls("n-" + q.sentTo, "wrong"); cls("n-" + q.gold, "should"); }
-    if (q.kind === "hole") cls("n-" + q.gold, "should");
+    var kind = kindIn(q, state.tab);
+    if (kind === "misroute") {
+      if (state.tab === "people") { cls("n-" + (q.tool ? HOLDER[q.tool] : q.asker), "wrong"); cls("n-" + (q.goldPerson || q.gold), "should"); }
+      else { cls("n-" + q.sentTo, "wrong"); cls("n-" + q.gold, "should"); }
+    }
+    if (kind === "hole") cls("n-" + q.gold, "should");
   }
-  function cls(id, c) { var n = document.getElementById(id); if (n) n.classList.add(c); }
 
   function trail(st) {
     if (st.toolOf) { var c = document.getElementById("chip-" + st.toolOf + "-" + st.tool); if (c) c.classList.add("on"); return null; }
-    var p = el("path", { "class": "trail" + (st.tone !== "ok" ? " " + st.tone : ""), d: pathD(state.tab, P, st.from, st.to) }, layers.trails);
+    if (st.at) return null;
+    var p = el("path", { "class": "trail" + (st.tone !== "ok" ? " " + st.tone : ""), d: pathD(state.tab, st.from, st.to) }, layers.trails);
     var s0 = p.getPointAtLength(0), s1 = p.getPointAtLength(p.getTotalLength()), F = P[st.from];
     function far(pt) { return (pt.x - F.x) * (pt.x - F.x) + (pt.y - F.y) * (pt.y - F.y); }
     return { path: p, rev: far(s0) > far(s1) };
   }
 
+  function clearRun() {
+    layers.trails.textContent = "";
+    Array.prototype.forEach.call(layers.top.querySelectorAll(".packet, .float"), function (x) { x.remove(); });
+    Array.prototype.forEach.call(svg.querySelectorAll(".chip.on"), function (c) { c.classList.remove("on"); });
+  }
+
   function showStatic() {
     var q = currentQ(), S = steps(q, state.tab);
-    layers.trails.textContent = ""; layers.top.querySelectorAll(".packet").forEach(function (x) { x.remove(); });
-    Array.prototype.forEach.call(svg.querySelectorAll(".chip.on"), function (c) { c.classList.remove("on"); });
-    mark(q);
+    clearRun(); mark(q);
     S.forEach(function (st) { trail(st); });
     renderPanels(S, S.length);
   }
 
+  function floatLabel(st) {
+    var text = short(st.payload, 54), w = text.length * 7.3 + 18;
+    var g = el("g", { "class": "float" + (st.tone !== "ok" ? " " + st.tone : "") }, layers.top);
+    var r = el("rect", { width: w, height: 24, rx: 5 }, g), t = el("text", {}, g, text);
+    return function (pt) {
+      var x = Math.max(6, Math.min(W - w - 6, pt.x - w / 2)), y = Math.max(6, pt.y - 40);
+      r.setAttribute("x", x); r.setAttribute("y", y); t.setAttribute("x", x + 9); t.setAttribute("y", y + 16.5);
+      return g;
+    };
+  }
+
   function play() {
     var run = ++state.run, q = currentQ(), S = steps(q, state.tab), i = -1;
-    layers.trails.textContent = ""; layers.top.querySelectorAll(".packet").forEach(function (x) { x.remove(); });
-    Array.prototype.forEach.call(svg.querySelectorAll(".chip.on"), function (c) { c.classList.remove("on"); });
-    mark(q);
-    renderPanels(S, -1);
+    clearRun(); mark(q); renderPanels(S, -1);
     function next() {
       if (run !== state.run) return;
+      Array.prototype.forEach.call(svg.querySelectorAll(".node.active"), function (n) { n.classList.remove("active"); });
       i++;
       if (i >= S.length) {
         renderPanels(S, S.length);
@@ -510,24 +637,25 @@ code { font: 12.5px var(--mono); }
           if (run !== state.run || !state.animate) return;
           var k = 0; QUERIES.forEach(function (x, n) { if (x.id === state.q) k = n; });
           state.q = QUERIES[(k + 1) % QUERIES.length].id; renderQueries(); play();
-        }, 2600);
+        }, 5000);
         return;
       }
       var st = S[i];
       renderPanels(S, i);
       var t = trail(st);
-      if (!t) { setTimeout(next, 900); return; }
-      var len = t.path.getTotalLength(), dot = el("circle", { r: 7, "class": "packet" + (st.tone !== "ok" ? " " + st.tone : "") }, layers.top);
-      t.path.setAttribute("stroke-dasharray", st.tone === "gap" ? "6 5" : len + " " + len);
-      var start = null, dur = Math.max(700, Math.min(1500, len * 2.6));
+      if (!t) { cls("n-" + (st.toolOf || st.at), "active"); setTimeout(next, 2100); return; }
+      var len = t.path.getTotalLength(), tone = st.tone !== "ok" ? " " + st.tone : "";
+      var dot = el("circle", { r: 8, "class": "packet" + tone }, layers.top), place = floatLabel(st), lab = null;
+      if (st.tone !== "gap") t.path.setAttribute("stroke-dasharray", len + " " + len);
+      var start = null, dur = Math.max(1900, Math.min(3600, len * 6));
       function frame(ts) {
-        if (run !== state.run) { dot.remove(); return; }
+        if (run !== state.run) { dot.remove(); if (lab) lab.remove(); return; }
         if (start === null) start = ts;
         var k = Math.min(1, (ts - start) / dur), e = k < .5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2;
         var pt = t.path.getPointAtLength(t.rev ? len * (1 - e) : len * e);
-        dot.setAttribute("cx", pt.x); dot.setAttribute("cy", pt.y);
+        dot.setAttribute("cx", pt.x); dot.setAttribute("cy", pt.y); lab = place(pt);
         if (st.tone !== "gap") t.path.setAttribute("stroke-dashoffset", t.rev ? -len * (1 - e) : len * (1 - e));
-        if (k < 1) requestAnimationFrame(frame); else { dot.remove(); setTimeout(next, 260); }
+        if (k < 1) requestAnimationFrame(frame); else setTimeout(function () { dot.remove(); if (lab) lab.remove(); next(); }, 650);
       }
       requestAnimationFrame(frame);
     }
@@ -540,10 +668,11 @@ code { font: 12.5px var(--mono); }
   function renderQueries() {
     var box = document.getElementById("queries"); box.textContent = "";
     QUERIES.forEach(function (q) {
+      var kind = kindIn(q, state.tab);
       var b = document.createElement("button"); b.type = "button"; b.className = "query"; b.id = "query-" + q.id;
       b.setAttribute("aria-pressed", q.id === state.q ? "true" : "false");
       var t = document.createElement("span"); t.textContent = q.text;
-      var g = document.createElement("span"); g.className = "tag " + q.kind; g.textContent = q.kind === "misroute" ? q.type : q.kind;
+      var g = document.createElement("span"); g.className = "tag " + kind; g.textContent = kind === "misroute" ? q.type : kind;
       b.appendChild(t); b.appendChild(g);
       b.addEventListener("click", function () { state.q = q.id; renderQueries(); refresh(); });
       box.appendChild(b);
@@ -551,6 +680,7 @@ code { font: 12.5px var(--mono); }
   }
 
   function setTab(tab, fromHash) {
+    if (tab === "diffuse") tab = "people";
     if (!TABS[tab]) tab = "siloed";
     state.tab = tab;
     Array.prototype.forEach.call(document.querySelectorAll(".tab"), function (b) {
@@ -559,7 +689,7 @@ code { font: 12.5px var(--mono); }
     var n = document.getElementById("tabnote"), T = TABS[tab];
     n.innerHTML = T.note + " <span class=\"built " + (T.built ? "yes" : "no") + "\">" + (T.built ? "runs in the repo" : "drawn, not built") + "</span>";
     if (!fromHash) { try { history.replaceState(null, "", "#" + tab); } catch (e) { location.hash = tab; } }
-    draw(); refresh();
+    draw(); renderQueries(); refresh();
   }
 
   Array.prototype.forEach.call(document.querySelectorAll(".tab"), function (b) {
@@ -571,7 +701,6 @@ code { font: 12.5px var(--mono); }
   });
   window.addEventListener("hashchange", function () { setTab(location.hash.slice(1), true); });
 
-  renderQueries();
   setTab(location.hash.slice(1) || "siloed", true);
 })();
 </script>
