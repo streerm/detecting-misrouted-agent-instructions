@@ -32,7 +32,7 @@ models:
     model: llama3.1:8b
     api_key_env: null
 
-  vllm-server:                # e.g. a the sponsor GPU box running `vllm serve <model>`
+  vllm-server:                # e.g. a GPU server (own, sponsor or AWS EC2) running `vllm serve <model>`
     provider: openai_compat
     base_url: ${VLLM_BASE_URL:-http://localhost:8000/v1}
     model: Qwen/Qwen2.5-32B-Instruct

@@ -1,2 +1,2 @@
 @AGENTS.md
-@docs/HANDOVER.md
+@docs/STATUS.md

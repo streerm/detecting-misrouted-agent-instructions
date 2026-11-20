@@ -1,6 +1,8 @@
 # detecting-misrouted-agent-instructions
 
-Team repo for the Oxford Edge AI/ML Challenge (the sponsor), **spec 41: "Detecting Misrouted Instructions in Hierarchical Agent Systems"**.
+Prototype scaffold for a student team project in the Oxford Edge AI/ML Challenge, **spec 41: "Detecting Misrouted Instructions in Hierarchical Agent Systems"**.
+
+> **Status, 20 Nov 2026: a scaffold, not a result.** No request has been routed or answered by a real model yet; tests and the demo run on an offline `echo` model. The data tools are real and return live data. The team has not yet chosen a direction, a use case or a framework, and this repo holds more components than the project will use. See [`docs/STATUS.md`](docs/STATUS.md) for what works, what is wired but not set up, and what is missing, and [`docs/research-desk-wiring.html`](docs/research-desk-wiring.html) for a drawing of the example desk under four wirings.
 
 The framework is **model-agnostic**: every agent is a *card* (YAML) plus *skills* (`SKILL.md` folders) plus a *model* chosen by name from a registry. Claude, Llama, Qwen, Mistral or anything behind an OpenAI-compatible endpoint (Ollama, vLLM, LM Studio, Together, Groq) can play any role, and you can swap one per experiment without touching code.
 
@@ -15,7 +17,9 @@ skills/            Reusable skills in the open Agent Skills format (SKILL.md + o
                      IC memo, pitch deck, ...), Apache 2.0, unmodified. See NOTICE.md there.
 agents/cards/      One YAML card per agent: capability, context scope, authority, skills, tools, model.
 configs/           models.yaml (model registry), data_sources.yaml (which data each agent may touch).
-.mcp.json          MCP data servers (SEC EDGAR, FRED). Read by Claude Code AND by our framework, so
+mcp_servers/       Small MCP servers of our own (catalogue, dbnomics, arxiv, sanctions, companies_house,
+                   backtest, news): standard library + mcp, read-only, every result has source and time.
+.mcp.json          The 11 MCP tool servers. Read by Claude Code AND by our framework, so
                    Claude and the experimental agents (Llama, Qwen, ...) use the same tools.
 src/misroute/      The framework.
   cards.py           AgentCard schema + loader
@@ -57,11 +61,22 @@ python scripts/run_demo.py --model llama-local --router-model claude-sonnet   # 
 | Server | Gives | Needs in `.env` | Used by card |
 | --- | --- | --- | --- |
 | `edgartools` | SEC filings, XBRL financials, notes, insider and fund data (13 tools) | `EDGAR_IDENTITY="Name email"` | `filings` |
+| `companies_house` (ours) | UK company search, profile, officers, filing history | `COMPANIES_HOUSE_API_KEY` | `filings` |
+| `alphavantage` | Prices, fundamentals, FX, commodities (official local server) | `ALPHAVANTAGE_API_KEY` | `market-data` |
+| `finnhub` | Quotes, estimates, ownership, calendars (community server) | `FINNHUB_API_KEY` | `market-data` |
+| `news` (ours) | Company headlines (Finnhub) and earnings call transcripts (Alpha Vantage) | both keys above | `news` |
 | `fred` | 800,000+ FRED macro series (3 tools) | `FRED_API_KEY` | `macro` |
+| `dbnomics` (ours) | Non-US macro: ECB, Eurostat, BoE, OECD, IMF | none | `macro` |
+| `backtest` (ours) | Moving-average crossover on prices the caller supplies | none | `backtest` |
+| `sanctions` (ours) | US Treasury OFAC SDN name screening | none | `compliance` |
+| `catalogue` (ours) | What data the desk has and which agent may use it | none | `router` |
+| `arxiv` (ours) | Paper search and abstracts | none | no card yet |
+
+Store a key without it appearing on screen: `python scripts/set_key.py ALPHAVANTAGE_API_KEY`.
 
 ```bash
 pip install -e ".[mcp]"                        # plus: uv (for uvx) and Node 18+ (for npx)
-python scripts/check_tools.py --smoke          # starts both servers, lists tools, makes one real call
+python scripts/check_tools.py --smoke          # starts every server, lists tools, makes one real call each
 python scripts/run_demo.py --tools --model qwen-local
 ```
 

@@ -3,7 +3,7 @@
 Source: the workshop's slide deck, a public claude.ai artifact: https://claude.ai/artifact/EAuL4Q1NvnAfyNKDacLg7x
 Read in full on 19 Nov 2026: all 53 slides and their speaker notes. These are notes in our own words, not a copy; open the link for the slides themselves. Figures quoted from the deck are the deck's, not checked by us.
 
-Event: Thursday 19 Nov 2026, 4 to 7pm, Cohen Quad. Run by Claude Builder Club Oxford with CapitOx and Alpha Fund. Guest talk: a guest speaker on sourcing sellers and finding buyers with Claude.
+Event: Thursday 19 Nov 2026, 4 to 7pm, Cohen Quad. Run by Claude Builder Club Oxford with CapitOx and Alpha Fund. There was also a guest talk on deal sourcing with Claude.
 
 ---
 
@@ -128,4 +128,4 @@ Collect the text; write the scoring rubric into the prompt (the deck uses −2 t
 
 ## 7. Club details
 
-Claude Builder Club Oxford: meetings 3 to 4 times a term, a monthly workshop, a hackathon at the end of Hilary term. Instagram @cbc_oxford. Contacts named for helping run events: the organisers. Next event: Ecosystem Social, Friday 20 Nov 2026, 7 to 9pm, The Oxford Retreat.
+Claude Builder Club Oxford: meetings 3 to 4 times a term, a monthly workshop, a hackathon at the end of Hilary term. Instagram @cbc_oxford. Next event: Ecosystem Social, Friday 20 Nov 2026, 7 to 9pm, The Oxford Retreat.
