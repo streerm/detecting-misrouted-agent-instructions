@@ -102,6 +102,10 @@ svg#net { display: block; width: 100%; min-width: 1000px; height: auto; }
 .float.gap rect { stroke: var(--gap); }
 .float text { font: 12px var(--mono); fill: var(--ink); }
 .note { font: 12px var(--mono); fill: var(--gap); }
+.stage { position: relative; }
+.tip { position: absolute; z-index: 5; max-width: 360px; background: var(--ink); color: var(--bg); font: 13px/1.45 var(--body); padding: 10px 12px; border-radius: 6px; pointer-events: none; }
+.tip b { font-weight: 600; }
+.hastip { cursor: help; }
 .node.stat .box { stroke: var(--muted); stroke-dasharray: 2 3; stroke-width: 1.4; }
 .node.stat.active .box { stroke: var(--accent); stroke-width: 3; stroke-dasharray: none; }
 .bell { fill: none; stroke: var(--ink); stroke-width: 1.6; stroke-linecap: round; }
@@ -181,10 +185,12 @@ code { font: 12.5px var(--mono); }
         <span><i class="key hole"></i>Missing, not in the repo</span>
         <span><svg width="22" height="22" viewBox="-13 -13 26 26" aria-hidden="true"><circle class="box statkey" r="11"></circle><path class="bell" d="M-7,4 C-3,4 -4,-6 0,-6 C4,-6 3,4 7,4"></path></svg>Statistical check, placement open</span>
         <span><i class="key wrong"></i>Misrouted</span>
+        <span>Hover or tap a box for what it does</span>
       </div>
     </div>
     <div class="now" id="now"></div>
     <div class="scroll"><svg id="net" viewBox="0 0 1200 720" role="img" aria-labelledby="nettitle"><title id="nettitle">Network of agents and their tools</title></svg></div>
+    <div class="tip" id="tip" role="tooltip" hidden></div>
     <div class="console" id="console" aria-live="polite" aria-label="Messages sent"></div>
   </section>
 
@@ -282,7 +288,7 @@ code { font: 12.5px var(--mono); }
     p.tools.forEach(function (t) { HOLDER[t] = p.id; });
   });
 
-  var LABEL = { req: "Requester", orch: "Orchestrator", gate: "Checker", human: "Human reviewer", stat: "Statistical check ?", model: "Router model" };
+  var LABEL = { req: "Requester", orch: "Orchestrator", gate: "Detectors and deferral gate", human: "Human reviewer", stat: "Statistical check ?", model: "Router model" };
   DESK.concat(ROW2, PEOPLE).forEach(function (a) { LABEL[a.id] = a.name; });
 
   var TABS = {
@@ -293,7 +299,7 @@ code { font: 12.5px var(--mono); }
     people: { built: false,
       note: "<strong>One agent per person.</strong> No orchestrator. Everyone in the channel has their own agent, and each agent holds only some of the tools. A request starts with the asker's own agent, which asks a colleague's agent when it lacks the tool. Who holds which tool is invented here for illustration, and the mentors' and one other member's agents are shown without tools because we do not know what they hold." },
     second: { built: false,
-      note: "<strong>Second opinion.</strong> The siloed hierarchy plus a check on the wire. The orchestrator sends each request to the agent it picked and to its runner-up, and a checker compares the two replies. A refusal from the runner-up supports the routing; two different answers go to a person. It is a version of the spec's contrastive output detector. It doubles the work, and it misses a misroute when both agents are wrong in the same way." }
+      note: "<strong>Second opinion.</strong> The siloed hierarchy plus a check on the wire. The orchestrator sends each request to the agent it picked and to its runner-up, and the detectors-and-gate box, switched on here, compares the two replies. A refusal from the runner-up supports the routing; two different answers go to a person. It is a version of the spec's contrastive output detector. It doubles the work, and it misses a misroute when both agents are wrong in the same way." }
   };
 
   // stages are in dependency order; the last stage's agent owns the answer.
@@ -401,14 +407,14 @@ code { font: 12.5px var(--mono); }
         add({ id: a.id, cls: a.hole ? "hole" : "idea", name: a.name, lines: a.tools || a.sub, chips: !!a.tools,
           x: 600 + 440 * Math.cos(t), y: 380 + 268 * Math.sin(t), w: 200, h: a.tools ? 44 + a.tools.length * 25 : 84 });
       });
-      add({ id: "gate", cls: "hole", name: "Where do detectors sit?", lines: ["no shared checkpoint"], center: true, x: 600, y: 380, w: 300, h: 60 });
+      add({ id: "gate", cls: "hole", name: "Detectors and deferral gate", lines: ["no central place for it here"], center: true, x: 600, y: 380, w: 300, h: 60 });
       add({ id: "model", cls: "idea", name: "Which model runs each agent?", lines: ["LLM · Jev · d1 / text diffusion"], center: true, x: 600, y: 300, w: 300, h: 56 });
       return;
     }
     add({ id: "req", cls: "", name: "Requester", lines: [], center: true, x: 120, y: 70, w: 160, h: 48 });
     add({ id: "orch", cls: "hub", name: "Orchestrator", lines: ["router card · catalogue"], center: true, x: 600, y: 70, w: 260, h: 70 });
-    if (tab === "second") add({ id: "gate", cls: "idea", name: "Checker", lines: ["compares the two replies"], center: true, x: 600, y: 184, w: 330, h: 54 });
-    else add({ id: "gate", cls: "hole", name: "Detectors and deferral gate", lines: ["in code, not on this wire"], center: true, x: 600, y: 184, w: 330, h: 54 });
+    if (tab === "second") add({ id: "gate", cls: "idea", name: "Detectors and deferral gate", lines: ["switched on here: compares two replies"], center: true, x: 600, y: 184, w: 330, h: 54 });
+    else add({ id: "gate", cls: "hole", name: "Detectors and deferral gate", lines: ["not built: messages pass unchecked"], center: true, x: 600, y: 184, w: 330, h: 54 });
     add({ id: "human", cls: "hole", name: "Human reviewer", lines: ["not built"], center: true, x: 1060, y: 184, w: 180, h: 54 });
     DESK.forEach(function (a, i) { add({ id: a.id, cls: "", name: a.name, lines: a.tools, chips: true, x: 105 + i * 198, y: 356, w: 172, h: 104 }); });
     ROW2.forEach(function (a, i) { add({ id: a.id, cls: a.cls, name: a.name, lines: a.lines, chips: !!a.chips, x: 96 + i * 168, y: tab === "peer" ? 650 : 540, w: 156, h: 122 }); });
@@ -524,7 +530,7 @@ code { font: 12.5px var(--mono); }
     s.push(msg("orch", "compliance", "routes the request", "ok", true, "route → " + Q));
     s.push(tool("compliance", "sanctions", "screens the counterparty", "ok", call));
     s.push(msg("compliance", "orch", "returns the screening and says it cannot approve alone", "ok", true, "\"Screening done. Approval needs a human sign-off.\""));
-    s.push(note("gate", tab === "second" ? "the checker sees a request that needs a person" : "the deferral gate would send this to a person, if it were on the wire", "gap", "defer(reason=\"approval needs a person\")"));
+    s.push(note("gate", tab === "second" ? "the gate sees a request that needs a person" : "the deferral gate would send this to a person, if it were on the wire", "gap", "defer(reason=\"approval needs a person\")"));
     s.push(msg("orch", "human", "would hand it to a reviewer: none exists", "gap", true, "screening result + request for sign-off"));
     s.push(msg("orch", "req", "says it is waiting for sign-off", "gap", true, "\"Screened. Waiting for a person to approve.\""));
     return { S: s, kind: "proposed", tag: "needs a person", wrong: [], should: [],
@@ -623,10 +629,10 @@ code { font: 12.5px var(--mono); }
       if (q.tool) s.push(tool(q.sentTo, q.tool, "calls a tool that answers a different question", "bad", q.call));
       s.push(msg(q.sentTo, "orch", "answers. Nothing errors.", "bad", true, q.wrong));
       if (tab !== "second") { s.push(msg("orch", "req", "passes the plausible answer on", "bad", true, q.wrong)); return s; }
-      s.push(msg(q.second, "orch", "replies through the checker", q.caught ? "ok" : "bad", true, q.secondSays));
+      s.push(msg(q.second, "orch", "replies through the gate", q.caught ? "ok" : "bad", true, q.secondSays));
       if (q.caught) {
         s.push(note("gate", "the two replies conflict", "gap", "compare → conflict"));
-        s.push(msg("orch", "human", "hands both replies to a person", "gap", true, "defer(reason=\"replies conflict\")"));
+        s.push(msg("orch", "human", "the gate hands both replies to a person", "gap", true, "defer(reason=\"replies conflict\")"));
         s.push(msg("orch", "req", "says it is with a reviewer", "gap", true, "\"Held for review: two agents disagree.\""));
       } else {
         s.push(note("gate", "the two replies agree, so nothing is flagged", "bad", "compare → agree"));
@@ -670,8 +676,41 @@ code { font: 12.5px var(--mono); }
     return e;
   }
 
+  var STAT_TIP = "<b>Statistical check, placement open.</b> A place where the team's statisticians could put a calibrated test, for example: is the route right, is the data that came back valid, is the answer valid. Nothing is built, and where these belong is their call.";
+  function tipFor(id) {
+    var t = state.tab;
+    if (id === "gate") return "<b>Detectors</b> are checks that ask whether a request reached the wrong agent. Four exist in the repo as functions (capability-profile check, contrastive output, self-report, tool-call) and have only run in the offline demo.<br><br><b>The deferral gate</b> is the decision that follows: send the request on, or hand it to a person. It is not built.<br><br>The orchestrator could do both jobs itself. They are drawn as a separate box so the check is visible.<br><br><b>On this tab:</b> " +
+      (t === "second" ? "switched on. It waits for the picked agent's reply and the runner-up's, then compares them." : t === "people" ? "there is no central point where every message passes, so there is no obvious place for it." : "not active. Messages pass through unchecked, which is why the misroutes get through.");
+    if (id === "human") return "<b>Human reviewer.</b> A person who receives requests the system should not answer on its own. Not built: today there is nobody to defer to.";
+    if (id === "model") return "<b>Which model makes the choice.</b> Today a keyword router, with an LLM router wired but never run. Named as candidates only: a decision model (Jev) and text diffusion models (d1). None has been tried.";
+    if (id === "orch") return "<b>Orchestrator.</b> Reads each request and sends it to one specialist. In the repo this is the router card, and it has only been run with keyword matching.";
+    if (id === "req") return "<b>Requester.</b> The person or system asking. In the examples, a member of the desk.";
+    for (var i = 0; i < ROW2.length; i++) if (ROW2[i].id === id && t !== "people")
+      return ROW2[i].cls === "hole" ? "<b>Missing.</b> The desk needs this and nothing exists for it: no card, and no data or tools behind it. Examples that call it show what would happen if it were built."
+        : "<b>Proposed.</b> An agent discussed for the desk that is not in the repo. Examples that call it show what would happen if it were built.";
+    if (deskIdx(id) > -1 && t !== "people") return "<b>Built and tested.</b> This agent has a card in the repo, and the tool servers listed in it return live data. It has not yet been run with a real model.";
+    if (t === "people") return "<b>Illustration.</b> One agent per person in the channel. Nothing on this tab is built, and who holds which tool is invented.";
+    return null;
+  }
+  function bindTip(g, html) {
+    if (!html) return;
+    var tip = document.getElementById("tip"), stage = document.querySelector(".stage");
+    g.classList.add("hastip");
+    function show(e) {
+      var r = stage.getBoundingClientRect();
+      tip.innerHTML = html; tip.hidden = false;
+      tip.style.left = Math.max(8, Math.min(r.width - 372, e.clientX - r.left + 14)) + "px";
+      tip.style.top = (e.clientY - r.top + 18) + "px";
+    }
+    g.addEventListener("mouseenter", show);
+    g.addEventListener("mousemove", show);
+    g.addEventListener("mouseleave", function () { tip.hidden = true; });
+    g.addEventListener("click", function (e) { if (tip.hidden) show(e); else tip.hidden = true; });
+  }
+
   function drawNode(n) {
     var g = el("g", { "class": "node " + n.cls, id: "n-" + n.id }, layers.nodes), top = n.y - n.h / 2, left = n.x - n.w / 2;
+    bindTip(g, tipFor(n.id));
     el("rect", { "class": "box", x: left, y: top, width: n.w, height: n.h, rx: 8 }, g);
     if (n.center) {
       el("text", { x: n.x, y: n.y + (n.lines.length ? -3 : 5), "text-anchor": "middle", "class": "name" }, g, n.name);
@@ -750,6 +789,7 @@ code { font: 12.5px var(--mono); }
   function statDot(x, y, id, label, side) {
     var g = el("g", { "class": "node stat" }, layers.top);
     if (id) g.setAttribute("id", id);
+    bindTip(g, STAT_TIP);
     el("circle", { "class": "box", cx: x, cy: y, r: 13 }, g);
     el("path", { "class": "bell", d: "M" + (x - 8) + "," + (y + 5) + " C" + (x - 3) + "," + (y + 5) + " " + (x - 4) + "," + (y - 7) + " " + x + "," + (y - 7) + " C" + (x + 4) + "," + (y - 7) + " " + (x + 3) + "," + (y + 5) + " " + (x + 8) + "," + (y + 5) }, g);
     if (label) el("text", side === "below" ? { x: x, y: y + 30, "text-anchor": "middle", "class": "sub" } : { x: x + 19, y: y + 4, "class": "sub" }, g, label);
@@ -758,7 +798,6 @@ code { font: 12.5px var(--mono); }
   // ---------- panels ----------
   function hopText(st) {
     if (st.toolOf) return LABEL[st.toolOf] + " ⚙ " + st.tool;
-    if (st.at === "gate" && state.tab !== "second") return state.tab === "people" ? "Detectors (no place for them)" : "Detectors (not on this wire)";
     if (st.at === "model" && state.tab === "people") return "Agent's model";
     if (st.at) return LABEL[st.at];
     return LABEL[st.from] + " → " + LABEL[st.to];
@@ -939,6 +978,7 @@ code { font: 12.5px var(--mono); }
     var n = document.getElementById("tabnote"), T = TABS[tab];
     n.innerHTML = T.note + " <span class=\"built " + (T.built ? "yes" : "no") + "\">" + (T.built ? "runs in the repo" : "drawn, not built") + "</span>";
     if (!fromHash) { try { history.replaceState(null, "", "#" + tab); } catch (e) { location.hash = tab; } }
+    document.getElementById("tip").hidden = true;
     draw(); renderQueries(); refresh();
   }
 
