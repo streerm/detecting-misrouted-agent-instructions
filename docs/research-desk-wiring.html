@@ -76,6 +76,7 @@ svg#net { display: block; width: 100%; min-width: 1000px; height: auto; }
 .edge { fill: none; stroke: var(--line); stroke-width: 1.4; }
 .edge.peer { stroke-dasharray: 2 5; }
 .edge.stub { stroke: var(--gap); stroke-dasharray: 5 5; }
+.edge.stub.thin { stroke-width: 1; opacity: .55; }
 .trail { fill: none; stroke: var(--accent); stroke-width: 3; stroke-linecap: round; }
 .trail.bad { stroke: var(--bad); }
 .trail.gap { stroke: var(--gap); stroke-dasharray: 7 6; }
@@ -415,6 +416,8 @@ code { font: 12.5px var(--mono); }
 
   }
 
+  function row2Has(id) { for (var i = 0; i < ROW2.length; i++) if (ROW2[i].id === id) return true; return false; }
+  function busY(tab) { return tab === "peer" ? 552 : 438; }
   function deskIdx(id) { for (var i = 0; i < DESK.length; i++) if (DESK[i].id === id) return i; return -1; }
 
   function pathD(tab, a, b) {
@@ -423,6 +426,7 @@ code { font: 12.5px var(--mono); }
       var has = function (x) { return a === x || b === x; }, other = a === "orch" ? b : a;
       if (has("orch") && has("req")) return "M" + P.req.x + "," + P.req.y + " L" + P.orch.x + "," + P.orch.y;
       if (has("orch") && has("human")) return "M" + P.orch.x + "," + P.orch.y + " L" + P.gate.x + "," + P.gate.y + " L" + P.human.x + "," + P.human.y;
+      if (has("orch") && row2Has(other)) return "M" + P.orch.x + "," + P.orch.y + " L" + P.gate.x + "," + (P.gate.y + P.gate.h / 2) + " L" + P.gate.x + "," + busY(tab) + " L" + P[other].x + "," + busY(tab) + " L" + P[other].x + "," + (P[other].y - P[other].h / 2);
       if (has("orch")) return "M" + P.orch.x + "," + P.orch.y + " L" + P.gate.x + "," + (P.gate.y + P.gate.h / 2) + " L" + P[other].x + "," + (P[other].y - P[other].h / 2);
       if (deskIdx(a) > -1 && deskIdx(b) > -1) {
         var yb = A.y + A.h / 2;
@@ -689,16 +693,24 @@ code { font: 12.5px var(--mono); }
       var real = PEOPLE.filter(function (p) { return !p.hole; });
       for (i = 0; i < real.length; i++) for (j = i + 1; j < real.length; j++)
         el("path", { "class": "edge peer", d: pathD(tab, real[i].id, real[j].id) }, layers.edges);
-      el("text", { x: 600, y: 770, "text-anchor": "middle", "class": "note" }, layers.top, "dotted: proposed agents and links · which person holds which tool is invented");
+      PEOPLE.filter(function (p) { return p.hole; }).forEach(function (h) {
+        real.forEach(function (r) { el("path", { "class": "edge stub thin", d: pathD(tab, h.id, r.id) }, layers.edges); });
+      });
+      el("text", { x: 600, y: 770, "text-anchor": "middle", "class": "note" }, layers.top, "dotted: proposed agents and links · dashed: missing · which person holds which tool is invented");
     } else {
       el("path", { "class": "edge", d: pathD(tab, "req", "orch") }, layers.edges);
       DESK.forEach(function (a) { el("path", { "class": "edge", d: pathD(tab, "orch", a.id) }, layers.edges); });
       if (tab === "peer") for (i = 0; i < DESK.length; i++) for (j = i + 1; j < DESK.length; j++)
         el("path", { "class": "edge peer", d: pathD(tab, DESK[i].id, DESK[j].id) }, layers.edges);
       el("path", { "class": "edge stub", d: "M" + P.gate.x + "," + P.gate.y + " L" + P.human.x + "," + P.human.y }, layers.edges);
+      var by = busY(tab);
+      el("path", { "class": "edge peer", d: "M" + P.gate.x + "," + (P.gate.y + P.gate.h / 2) + " L" + P.gate.x + "," + by + " M" + P[ROW2[0].id].x + "," + by + " L" + P[ROW2[ROW2.length - 1].id].x + "," + by }, layers.edges);
+      ROW2.forEach(function (a) {
+        el("path", { "class": a.cls === "hole" ? "edge stub" : "edge peer", d: "M" + P[a.id].x + "," + by + " L" + P[a.id].x + "," + (P[a.id].y - P[a.id].h / 2) }, layers.edges);
+      });
       el("path", { "class": "edge peer", d: "M" + P.orch.x + "," + P.orch.y + " L" + P.model.x + "," + P.model.y }, layers.edges);
-      el("text", { x: 600, y: tab === "peer" ? 572 : 462, "text-anchor": "middle", "class": "note" }, layers.top,
-        "second row: proposed agents (dotted) and missing ones (dashed) · Source A to C are placeholders");
+      el("text", { x: 600, y: tab === "peer" ? 736 : 626, "text-anchor": "middle", "class": "note" }, layers.top,
+        "second row: proposed agents (dotted lines) and missing ones (dashed lines), not in the repo · Source A to C are placeholders");
     }
     NODES.forEach(drawNode);
     // statistical checks: circles on the wires, placement open
