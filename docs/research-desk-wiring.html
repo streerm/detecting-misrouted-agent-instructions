@@ -416,7 +416,9 @@ code { font: 12.5px var(--mono); }
 
   }
 
+  function row2Idx(id) { for (var i = 0; i < ROW2.length; i++) if (ROW2[i].id === id) return i; return -1; }
   function row2Has(id) { for (var i = 0; i < ROW2.length; i++) if (ROW2[i].id === id) return true; return false; }
+  var RAIL1 = 256;
   function busY(tab) { return tab === "peer" ? 552 : 438; }
   function deskIdx(id) { for (var i = 0; i < DESK.length; i++) if (DESK[i].id === id) return i; return -1; }
 
@@ -427,7 +429,11 @@ code { font: 12.5px var(--mono); }
       if (has("orch") && has("req")) return "M" + P.req.x + "," + P.req.y + " L" + P.orch.x + "," + P.orch.y;
       if (has("orch") && has("human")) return "M" + P.orch.x + "," + P.orch.y + " L" + P.gate.x + "," + P.gate.y + " L" + P.human.x + "," + P.human.y;
       if (has("orch") && row2Has(other)) return "M" + P.orch.x + "," + P.orch.y + " L" + P.gate.x + "," + (P.gate.y + P.gate.h / 2) + " L" + P.gate.x + "," + busY(tab) + " L" + P[other].x + "," + busY(tab) + " L" + P[other].x + "," + (P[other].y - P[other].h / 2);
-      if (has("orch")) return "M" + P.orch.x + "," + P.orch.y + " L" + P.gate.x + "," + (P.gate.y + P.gate.h / 2) + " L" + P[other].x + "," + (P[other].y - P[other].h / 2);
+      if (has("orch")) return "M" + P.orch.x + "," + P.orch.y + " L" + P.gate.x + "," + RAIL1 + " L" + P[other].x + "," + RAIL1 + " L" + P[other].x + "," + (P[other].y - P[other].h / 2);
+      if (row2Has(a) && row2Has(b)) {
+        var y2 = A.y + A.h / 2;
+        return "M" + A.x + "," + y2 + " Q" + (A.x + B.x) / 2 + "," + (y2 + 40 + Math.abs(row2Idx(a) - row2Idx(b)) * 26) + " " + B.x + "," + y2;
+      }
       if (deskIdx(a) > -1 && deskIdx(b) > -1) {
         var yb = A.y + A.h / 2;
         return "M" + A.x + "," + yb + " Q" + (A.x + B.x) / 2 + "," + (yb + 44 + Math.abs(deskIdx(a) - deskIdx(b)) * 30) + " " + B.x + "," + yb;
@@ -686,7 +692,7 @@ code { font: 12.5px var(--mono); }
     var tab = state.tab;
     build(tab);
     while (svg.lastChild && svg.lastChild.nodeName !== "title") svg.removeChild(svg.lastChild);
-    svg.setAttribute("viewBox", "0 0 " + W + " " + (tab === "people" ? 780 : tab === "peer" ? 760 : 650));
+    svg.setAttribute("viewBox", "0 0 " + W + " " + (tab === "people" ? 780 : tab === "peer" ? 850 : 650));
     layers.edges = el("g", {}, svg); layers.trails = el("g", {}, svg); layers.nodes = el("g", {}, svg); layers.top = el("g", {}, svg);
     var i, j;
     if (tab === "people") {
@@ -700,17 +706,22 @@ code { font: 12.5px var(--mono); }
     } else {
       el("path", { "class": "edge", d: pathD(tab, "req", "orch") }, layers.edges);
       DESK.forEach(function (a) { el("path", { "class": "edge", d: pathD(tab, "orch", a.id) }, layers.edges); });
-      if (tab === "peer") for (i = 0; i < DESK.length; i++) for (j = i + 1; j < DESK.length; j++)
-        el("path", { "class": "edge peer", d: pathD(tab, DESK[i].id, DESK[j].id) }, layers.edges);
+      if (tab === "peer") {
+        for (i = 0; i < DESK.length; i++) for (j = i + 1; j < DESK.length; j++)
+          el("path", { "class": "edge peer", d: pathD(tab, DESK[i].id, DESK[j].id) }, layers.edges);
+        for (i = 0; i < ROW2.length; i++) for (j = i + 1; j < ROW2.length; j++)
+          el("path", { "class": "edge peer", d: pathD(tab, ROW2[i].id, ROW2[j].id) }, layers.edges);
+      }
       el("path", { "class": "edge stub", d: "M" + P.gate.x + "," + P.gate.y + " L" + P.human.x + "," + P.human.y }, layers.edges);
       var by = busY(tab);
-      el("path", { "class": "edge peer", d: "M" + P.gate.x + "," + (P.gate.y + P.gate.h / 2) + " L" + P.gate.x + "," + by + " M" + P[ROW2[0].id].x + "," + by + " L" + P[ROW2[ROW2.length - 1].id].x + "," + by }, layers.edges);
+      el("path", { "class": "edge", d: "M" + P.gate.x + "," + (P.gate.y + P.gate.h / 2) + " L" + P.gate.x + "," + by + " M" + P[ROW2[0].id].x + "," + by + " L" + P[ROW2[ROW2.length - 1].id].x + "," + by }, layers.edges);
       ROW2.forEach(function (a) {
         el("path", { "class": a.cls === "hole" ? "edge stub" : "edge peer", d: "M" + P[a.id].x + "," + by + " L" + P[a.id].x + "," + (P[a.id].y - P[a.id].h / 2) }, layers.edges);
       });
       el("path", { "class": "edge peer", d: "M" + P.orch.x + "," + P.orch.y + " L" + P.model.x + "," + P.model.y }, layers.edges);
-      el("text", { x: 600, y: tab === "peer" ? 736 : 626, "text-anchor": "middle", "class": "note" }, layers.top,
-        "second row: proposed agents (dotted lines) and missing ones (dashed lines), not in the repo · Source A to C are placeholders");
+      el("text", { x: 600, y: tab === "peer" ? 838 : 626, "text-anchor": "middle", "class": "note" }, layers.top,
+        tab === "peer" ? "both rows are wired the same way, each with its own peer links (links between rows are not drawn) · outline shows what exists: solid built, dotted proposed, dashed missing"
+          : "both rows are wired the same way · outline and line style show what exists: solid built, dotted proposed, dashed missing · Source A to C are placeholders");
     }
     NODES.forEach(drawNode);
     // statistical checks: circles on the wires, placement open
@@ -729,9 +740,9 @@ code { font: 12.5px var(--mono); }
       statDot(335, 70, null, "answer valid?", "below");
       statDot(600, 131, "n-stat", "route right?", "right");
       DESK.forEach(function (a, k) {
-        var y0 = P.gate.y + P.gate.h / 2, y1 = P[a.id].y - P[a.id].h / 2;
-        statDot(P.gate.x + (P[a.id].x - P.gate.x) * 0.62, y0 + (y1 - y0) * 0.62, null, k === DESK.length - 1 ? "data valid?" : "", "right");
+        statDot(P[a.id].x, (RAIL1 + P[a.id].y - P[a.id].h / 2) / 2, null, k === DESK.length - 1 ? "data valid?" : "", "right");
       });
+      ROW2.forEach(function (a) { statDot(P[a.id].x, (busY(tab) + P[a.id].y - P[a.id].h / 2) / 2); });
     }
   }
 
