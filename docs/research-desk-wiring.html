@@ -692,7 +692,7 @@ code { font: 12.5px var(--mono); }
     var tab = state.tab;
     build(tab);
     while (svg.lastChild && svg.lastChild.nodeName !== "title") svg.removeChild(svg.lastChild);
-    svg.setAttribute("viewBox", "0 0 " + W + " " + (tab === "people" ? 780 : tab === "peer" ? 850 : 650));
+    svg.setAttribute("viewBox", "0 0 " + W + " " + (tab === "people" ? 780 : tab === "peer" ? 872 : 650));
     layers.edges = el("g", {}, svg); layers.trails = el("g", {}, svg); layers.nodes = el("g", {}, svg); layers.top = el("g", {}, svg);
     var i, j;
     if (tab === "people") {
@@ -720,9 +720,10 @@ code { font: 12.5px var(--mono); }
       });
       el("path", { "class": "edge peer", d: "M" + P.orch.x + "," + P.orch.y + " L" + P.model.x + "," + P.model.y }, layers.edges);
       el("text", { x: 600, y: tab === "peer" ? 838 : 626, "text-anchor": "middle", "class": "note" }, layers.top,
-        tab === "peer" ? "both rows are wired the same way, each with its own peer links (links between rows are not drawn) · outline shows what exists: solid built, dotted proposed, dashed missing"
+        tab === "peer" ? "both rows are wired the same way, each with its own peer links (links between rows are not drawn)"
           : "both rows are wired the same way · outline and line style show what exists: solid built, dotted proposed, dashed missing · Source A to C are placeholders");
     }
+    if (tab === "peer") el("text", { x: 600, y: 858, "text-anchor": "middle", "class": "note" }, layers.top, "outline shows what exists: solid built, dotted proposed, dashed missing · Source A to C are placeholders");
     NODES.forEach(drawNode);
     // statistical checks: circles on the wires, placement open
     if (tab === "people") {
