@@ -34,6 +34,8 @@ h3 { font: 600 12px/1.3 var(--body); margin: 0; text-transform: uppercase; lette
 p { margin: 0; }
 .lede { max-width: 68ch; color: var(--muted); }
 .status { font: 12px/1.4 var(--mono); color: var(--muted); }
+.callout { max-width: 86ch; border: 1px solid var(--ink); border-radius: 6px; padding: 10px 14px; background: var(--surface); }
+.callout strong { font-weight: 600; }
 header { display: flex; flex-direction: column; gap: 8px; }
 
 .tabs { display: flex; flex-wrap: wrap; gap: 6px; }
@@ -122,7 +124,7 @@ svg#net { display: block; width: 100%; min-width: 1000px; height: auto; }
 .tag { font: 11px/1.5 var(--mono); padding: 1px 6px; border-radius: 4px; margin-left: auto; white-space: nowrap; }
 .tag.clean { background: var(--accent-soft); color: var(--accent); }
 .tag.misroute { background: var(--bad-soft); color: var(--bad); }
-.tag.hole { background: var(--gap-soft); color: var(--gap); }
+.tag.hole, .tag.limited, .tag.recovered { background: var(--gap-soft); color: var(--gap); }
 .trace { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0; background: var(--surface);
   border: 1px solid var(--line); border-radius: 6px; }
 .trace li { padding: 8px 11px; border-bottom: 1px solid var(--line); font-size: 13.5px; display: grid; grid-template-columns: 22px minmax(0, 1fr); gap: 8px; }
@@ -151,9 +153,10 @@ code { font: 12.5px var(--mono); }
 
 <div class="wrap">
   <header>
-    <p class="status">DRAFT · 20 NOV 2026 · EXAMPLE DESK, NOT A TEAM DECISION</p>
+    <p class="status">DRAFT · 20 NOV 2026 · EXAMPLE DESK, NOT A TEAM DECISION · NOTHING HERE IS ROUTED BY A REAL MODEL YET</p>
     <h1>Research Desk Wiring</h1>
     <p class="lede">One orchestrator, six specialist agents and eleven tool servers, drawn four ways. Solid boxes are built and tested, dotted boxes are proposals, and dashed amber boxes are holes: things the desk needs and does not have. The traces are scripted illustrations of how a request would travel. None is a recording of a real run, and results are described, never given as figures.</p>
+    <p class="callout"><strong>Read this as a buffet, not a build plan.</strong> It shows more components and wirings than a six-week project will use, so the team can choose. What is real today: seven agent cards, eleven tool servers that answer direct calls, and detectors that run offline. No request has been routed or answered by a real model, and no architecture on this page is fully implemented.</p>
   </header>
 
   <div class="tabs" role="tablist" aria-label="Org structure">
@@ -195,6 +198,8 @@ code { font: 12.5px var(--mono); }
     <h2>Holes still to fill</h2>
     <div class="holes">
       <div class="holegroup"><h3>Agents</h3><ul>
+        <li><b>Research agents and their sources</b><span>Web collector, signal compiler and data analysis are proposals. Source A to C are placeholders: no web collection is built and no sources are chosen.</span></li>
+        <li><b>Subject experts</b><span>Sector, accounting and risk experts are proposed as agents with skills and no tools. None has a card.</span></li>
         <li><b>Positions and portfolio</b><span>No card and no data. "What's our exposure to oil?" has no correct place to go.</span></li>
         <li><b>Research papers</b><span>The arxiv server works, but no agent card uses it.</span></li>
         <li><b>Internal documents</b><span>The Deutsche Bank slide has an assistant over notes and research. Nothing here.</span></li>
@@ -211,19 +216,20 @@ code { font: 12.5px var(--mono); }
         <li><b>Detectors in the graph</b><span>Four exist in code (capability-profile check, contrastive output, self-report, tool-call). None sits on a wire that runs.</span></li>
         <li><b>Gate and calibration</b><span>Nothing decides between "route it" and "ask a human", and no threshold is calibrated.</span></li>
         <li><b>Three of the four wirings</b><span>Peer links, one agent per person and second opinion are drawn, not built. The repo does one hop: router to one specialist.</span></li>
-        <li><b>A decision model as router</b><span>Jev or an open equivalent has not been tried against the keyword and LLM routers.</span></li>
+        <li><b>Statistical guarantees</b><span>Where calibration, confidence gating and deferral sit is open, for the statisticians on the team to place. The "?" node marks it on every tab.</span></li>
+        <li><b>Which model routes</b><span>A decision model (Jev), a reasoning diffusion model (d1) and other text diffusion models are named as candidates only. None has been tried against the keyword and LLM routers.</span></li>
       </ul></div>
       <div class="holegroup"><h3>Evidence</h3><ul>
         <li><b>A real model run</b><span>No model key is set, so no agent has used these tools with a real model.</span></li>
-        <li><b>A real request set</b><span>Twelve sample requests. Demo scores are a plumbing check, not a result.</span></li>
+        <li><b>A real request set</b><span>Twelve sample requests in the repo. Demo scores are a plumbing check, not a result.</span></li>
         <li><b>Traces</b><span>JSONL files only; Langfuse is not wired.</span></li>
-        <li><b>The sponsor's own map</b><span>No list of their agents (their agents), and no team decision on direction or use case.</span></li>
+        <li><b>The sponsor's own map</b><span>No list of the sponsor's agents, and no team decision on direction, use case or framework.</span></li>
       </ul></div>
     </div>
   </section>
 
   <footer>
-    <p>Agents and tools are read from the repo's cards and <code>.mcp.json</code> as of 20 Nov 2026. The four misroute names quote spec 41 exactly. The misroute examples come from the team discussion on 18 Nov. The four structures are candidate wirings for the rewiring experiment, not decisions, and the split of tools between people is invented for illustration.</p>
+    <p>Agents and tools are read from the repo's cards and <code>.mcp.json</code> as of 20 Nov 2026. The four misroute names quote spec 41 exactly. The misroute examples come from a team discussion on 18 Nov. The four structures are candidate wirings for the rewiring experiment, not decisions, and the split of tools between people is invented for illustration.</p>
   </footer>
 </div>
 
@@ -242,20 +248,24 @@ code { font: 12.5px var(--mono); }
     { id: "backtest", name: "Backtest", tools: ["backtest"] },
     { id: "compliance", name: "Compliance", tools: ["sanctions"] }
   ];
-  var DESK_HOLES = [
-    { id: "positions", name: "Positions and portfolio", sub: ["no card, no data"] },
-    { id: "papers", name: "Research papers", sub: ["arxiv ready, no card"] },
-    { id: "docs", name: "Internal documents", sub: ["nothing built"] }
+  var ROW2 = [
+    { id: "collector", cls: "idea", name: "Web collector", lines: ["Source A", "Source B", "Source C"], chips: true },
+    { id: "signals", cls: "idea", name: "Signal compiler", lines: ["collected data", "into signals"] },
+    { id: "analysis", cls: "idea", name: "Data analysis", lines: ["code execution", "statistics"], chips: true },
+    { id: "sme", cls: "idea", name: "Subject experts", lines: ["sector · accounts", "risk · skills only"] },
+    { id: "positions", cls: "hole", name: "Positions", lines: ["no card", "no data"] },
+    { id: "papers", cls: "hole", name: "Research papers", lines: ["arxiv ready", "no card"] },
+    { id: "docs", cls: "hole", name: "Internal docs", lines: ["nothing built"] }
   ];
   var PEOPLE = [
     { id: "ta", name: "Team member A's agent", tools: ["catalogue", "arxiv"] },
     { id: "tb", name: "Team member B's agent", tools: ["alphavantage", "finnhub", "news"] },
     { id: "ma", name: "Mentor A's agent", sub: ["sponsor mentor", "tools not known to us"] },
-    { id: "gr", name: "Sponsor's own agents", hole: true, sub: ["not listed", "not known to us"] },
+    { id: "gr", name: "Sponsor's own agents", hole: true, sub: ["not known to us"] },
     { id: "mb", name: "Mentor B's agent", sub: ["sponsor mentor", "tools not known to us"] },
     { id: "tc", name: "Team member C's agent", tools: ["fred", "dbnomics"] },
     { id: "td", name: "Team member D's agent", tools: ["edgartools", "backtest"] },
-    { id: "positions", name: "Positions and portfolio", hole: true, sub: ["nobody holds this data"] },
+    { id: "positions", name: "Positions", hole: true, sub: ["nobody holds this data"] },
     { id: "te", name: "Team member E's agent", tools: ["sanctions", "companies_house"] },
     { id: "cm", name: "Channel member's agent", sub: ["in the channel", "tools not known to us"] }
   ];
@@ -266,8 +276,8 @@ code { font: 12.5px var(--mono); }
     p.tools.forEach(function (t) { HOLDER[t] = p.id; });
   });
 
-  var LABEL = { req: "Requester", orch: "Orchestrator", gate: "Checker", human: "Human reviewer" };
-  DESK.concat(DESK_HOLES, PEOPLE).forEach(function (a) { LABEL[a.id] = a.name; });
+  var LABEL = { req: "Requester", orch: "Orchestrator", gate: "Checker", human: "Human reviewer", stat: "Statistical guarantees ?", model: "Router model" };
+  DESK.concat(ROW2, PEOPLE).forEach(function (a) { LABEL[a.id] = a.name; });
 
   var TABS = {
     siloed: { built: true,
@@ -320,6 +330,8 @@ code { font: 12.5px var(--mono); }
       second: "macro", secondSays: "an oil price series too · source FRED", caught: false,
       asker: "ta",
       why: "The question is about the desk's own positions. No agent holds them, so the nearest-sounding agent answers a different question." },
+    { id: "q11", kind: "recovered", text: "What did management say about margins on the last earnings call?", script: referScript },
+    { id: "q10", kind: "limited", text: "Is it still above the level we discussed?", script: limitedScript },
     { id: "q8", kind: "hole", text: "Find recent papers on conformal prediction for routing.",
       gold: "papers", asker: "tc",
       stages: [{ agent: "papers", tool: "arxiv", does: "searches arXiv",
@@ -341,9 +353,11 @@ code { font: 12.5px var(--mono); }
       PEOPLE.forEach(function (a, i) {
         var t = (-90 + i * 360 / PEOPLE.length) * Math.PI / 180;
         add({ id: a.id, cls: a.hole ? "hole" : "idea", name: a.name, lines: a.tools || a.sub, chips: !!a.tools,
-          x: 600 + 440 * Math.cos(t), y: 380 + 268 * Math.sin(t), w: 190, h: a.tools ? 44 + a.tools.length * 25 : 84 });
+          x: 600 + 440 * Math.cos(t), y: 380 + 268 * Math.sin(t), w: 200, h: a.tools ? 44 + a.tools.length * 25 : 84 });
       });
       add({ id: "gate", cls: "hole", name: "Where do detectors sit?", lines: ["no shared checkpoint"], center: true, x: 600, y: 380, w: 300, h: 60 });
+      add({ id: "model", cls: "idea", name: "Which model runs each agent?", lines: ["LLM · Jev · d1 / text diffusion"], center: true, x: 600, y: 300, w: 300, h: 56 });
+      add({ id: "stat", cls: "idea", name: "Statistical guarantees ?", lines: ["confidence gate · placement open"], center: true, x: 600, y: 458, w: 300, h: 54 });
       return;
     }
     add({ id: "req", cls: "", name: "Requester", lines: [], center: true, x: 120, y: 70, w: 160, h: 48 });
@@ -352,7 +366,9 @@ code { font: 12.5px var(--mono); }
     else add({ id: "gate", cls: "hole", name: "Detectors and deferral gate", lines: ["in code, not on this wire"], center: true, x: 600, y: 184, w: 330, h: 54 });
     add({ id: "human", cls: "hole", name: "Human reviewer", lines: ["not built"], center: true, x: 1060, y: 184, w: 180, h: 54 });
     DESK.forEach(function (a, i) { add({ id: a.id, cls: "", name: a.name, lines: a.tools, chips: true, x: 105 + i * 198, y: 356, w: 172, h: 104 }); });
-    DESK_HOLES.forEach(function (a, i) { add({ id: a.id, cls: "hole", name: a.name, lines: a.sub, x: 300 + i * 300, y: tab === "peer" ? 628 : 516, w: 220, h: 70 }); });
+    ROW2.forEach(function (a, i) { add({ id: a.id, cls: a.cls, name: a.name, lines: a.lines, chips: !!a.chips, x: 96 + i * 168, y: tab === "peer" ? 650 : 540, w: 156, h: 122 }); });
+    add({ id: "model", cls: "idea", name: "Which model routes?", lines: ["keyword · LLM · Jev · d1 / text diffusion"], center: true, x: 985, y: 70, w: 330, h: 70 });
+    add({ id: "stat", cls: "idea", name: "Statistical guarantees ?", lines: ["confidence gate · placement open"], center: true, x: 170, y: 184, w: 270, h: 54 });
   }
 
   function deskIdx(id) { for (var i = 0; i < DESK.length; i++) if (DESK[i].id === id) return i; return -1; }
@@ -378,7 +394,64 @@ code { font: 12.5px var(--mono); }
   function tool(agent, name, label, tone, payload) { return { toolOf: agent, tool: name, label: label, tone: tone || "ok", payload: payload || "" }; }
   function note(at, label, tone, payload) { return { at: at, label: label, tone: tone || "ok", payload: payload || "" }; }
 
+  function referScript(tab) {
+    var Q = "\"What did management say about margins on the last earnings call?\"", s = [],
+      call = "earnings_call_transcript(symbol, quarter, contains=\"margin\")", res = "quoted turns with speakers · source Alpha Vantage";
+    if (tab === "people") {
+      var me = "tc", wrong = HOLDER.edgartools, right = HOLDER.news;
+      s.push(note(me, PERSON[me] + " asks their own agent", "ok", Q));
+      s.push(msg(me, wrong, "asks the colleague whose agent holds filings", "bad", false, Q));
+      s.push(msg(wrong, right, "does not know, but knows who does, and hands it on", "gap", false, "refer: \"not mine; your agent holds call transcripts\""));
+      s.push(tool(right, "news", "reads the transcript and filters for margins", "ok", call));
+      s.push(msg(right, me, "returns quoted turns with speakers", "ok", false, res));
+      s.push(note(me, "answers " + PERSON[me], "ok", "quotes with speaker and quarter"));
+      return { S: s, kind: "recovered", tag: "capability mismatch · recovered", wrong: [wrong], should: [right],
+        verdict: "Misroute: capability mismatch, recovered. The first agent did not hold transcripts, said so, and named the agent that does. One extra message." };
+    }
+    s.push(msg("req", "orch", "asks the question", "ok", true, Q));
+    s.push(msg("orch", "filings", "routes to the wrong agent", "bad", true, "route → " + Q));
+    if (tab === "peer") s.push(msg("filings", "news", "does not know, but knows who does, and hands it on", "gap", false, "refer: \"not mine; you hold call transcripts\""));
+    else {
+      s.push(msg("filings", "orch", "declines and names the agent that knows", "gap", true, "OUT_OF_PROFILE: \"I don't know, but the News agent does: it holds call transcripts.\""));
+      s.push(msg("orch", "news", "re-routes on the referral", "ok", true, "route → " + Q));
+    }
+    s.push(tool("news", "news", "reads the transcript and filters for margins", "ok", call));
+    s.push(msg("news", "orch", "returns quoted turns with speakers", "ok", true, res));
+    s.push(msg("orch", "req", "returns the answer", "ok", true, "quotes with speaker and quarter"));
+    return { S: s, kind: "recovered", tag: "capability mismatch · recovered", wrong: ["filings"], should: ["news"],
+      verdict: "Misroute: capability mismatch, recovered. The Filings agent did not hold transcripts, said so, and named the agent that does. This is the self-report signal working; it costs " + (tab === "peer" ? "one extra message." : "two extra messages.") };
+  }
+
+  function limitedScript(tab) {
+    var Q = "\"Is it still above the level we discussed?\"", s = [];
+    if (tab === "people") {
+      var me = "te", h = HOLDER.alphavantage;
+      s.push(note(me, PERSON[me] + " asks their own agent", "ok", Q));
+      s.push(note(me, "has the earlier conversation, so it fills in the instrument and the level", "ok", "context: earlier thread → instrument and level known"));
+      s.push(msg(me, h, "asks for the latest price, with the instrument named", "ok", false, "need: latest price for <instrument>, with its date"));
+      s.push(tool(h, "alphavantage", "fetches the latest quote", "ok", "TOOL_CALL(\"GLOBAL_QUOTE\", symbol=<instrument>)"));
+      s.push(msg(h, me, "returns the price with its date", "ok", false, "latest price with as-of date · source Alpha Vantage"));
+      s.push(note(me, "answers " + PERSON[me], "ok", "above or below the level, with the price date"));
+      return { S: s, kind: "clean", tag: "limited context · resolved", wrong: [], should: [],
+        verdict: "Works here: the asker's own agent holds the earlier conversation, so it can fill in what the message leaves out." };
+    }
+    s.push(msg("req", "orch", "asks the question", "ok", true, Q));
+    if (tab === "second") {
+      s.push(note("stat", "the router's confidence is too low to route", "gap", "confidence below threshold (threshold not calibrated)"));
+      s.push(msg("orch", "req", "asks instead of guessing", "gap", true, "\"I don't know which instrument or level you mean. Which are they?\""));
+      return { S: s, kind: "limited", tag: "limited context · held", wrong: [], should: [],
+        verdict: "Held: with a confidence gate the orchestrator asks a question instead of guessing. Where that gate sits and how its threshold is set is the open statistical question." };
+    }
+    s.push(msg("orch", "market", "guesses from the word \"level\"", "bad", true, "route → " + Q));
+    s.push(tool("market", "alphavantage", "has to guess the instrument too", "bad", "TOOL_CALL(\"GLOBAL_QUOTE\", symbol=?)"));
+    s.push(msg("market", "orch", "returns a price for a guessed instrument", "bad", true, "a price for a guessed ticker · source Alpha Vantage"));
+    s.push(msg("orch", "req", "passes the plausible answer on", "bad", true, "\"Yes, it is above.\" (instrument and level both guessed)"));
+    return { S: s, kind: "limited", tag: "limited context", wrong: ["market"], should: [],
+      verdict: "Limited context: the request names no instrument and no level. Nothing in the message lets the router choose, so it guesses, and the answer still reads as plausible." };
+  }
+
   function steps(q, tab) {
+    if (q.script) return q.script(tab).S;
     var s = [], Q = "\"" + short(q.text, 70) + "\"", st = q.stages || [], owner = st[st.length - 1], deps = st.slice(0, -1);
 
     if (tab === "people") {
@@ -495,7 +568,7 @@ code { font: 12.5px var(--mono); }
     var tab = state.tab;
     build(tab);
     while (svg.lastChild && svg.lastChild.nodeName !== "title") svg.removeChild(svg.lastChild);
-    svg.setAttribute("viewBox", "0 0 " + W + " " + (tab === "people" ? 780 : tab === "peer" ? 720 : 600));
+    svg.setAttribute("viewBox", "0 0 " + W + " " + (tab === "people" ? 780 : tab === "peer" ? 760 : 650));
     layers.edges = el("g", {}, svg); layers.trails = el("g", {}, svg); layers.nodes = el("g", {}, svg); layers.top = el("g", {}, svg);
     var i, j;
     if (tab === "people") {
@@ -509,8 +582,10 @@ code { font: 12.5px var(--mono); }
       if (tab === "peer") for (i = 0; i < DESK.length; i++) for (j = i + 1; j < DESK.length; j++)
         el("path", { "class": "edge peer", d: pathD(tab, DESK[i].id, DESK[j].id) }, layers.edges);
       el("path", { "class": "edge stub", d: "M" + P.gate.x + "," + P.gate.y + " L" + P.human.x + "," + P.human.y }, layers.edges);
-      el("text", { x: 600, y: tab === "peer" ? 578 : 466, "text-anchor": "middle", "class": "note" }, layers.top,
-        tab === "peer" ? "dotted arcs above: peer links, drawn but not built · below: agents the desk is missing" : "agents the desk is missing");
+      el("path", { "class": "edge peer", d: "M" + P.orch.x + "," + P.orch.y + " L" + P.model.x + "," + P.model.y }, layers.edges);
+      el("path", { "class": "edge peer", d: "M" + P.stat.x + "," + P.stat.y + " L" + P.gate.x + "," + P.gate.y }, layers.edges);
+      el("text", { x: 600, y: tab === "peer" ? 572 : 462, "text-anchor": "middle", "class": "note" }, layers.top,
+        "second row: proposed agents (dotted) and missing ones (dashed) · Source A to C are placeholders");
     }
     NODES.forEach(drawNode);
   }
@@ -522,7 +597,8 @@ code { font: 12.5px var(--mono); }
     return LABEL[st.from] + " → " + LABEL[st.to];
   }
   function currentQ() { for (var i = 0; i < QUERIES.length; i++) if (QUERIES[i].id === state.q) return QUERIES[i]; return QUERIES[0]; }
-  function kindIn(q, tab) { return q.kind === "hole" && tab === "people" ? "clean" : q.kind; }
+  function kindIn(q, tab) { return q.script ? q.script(tab).kind : q.kind === "hole" && tab === "people" ? "clean" : q.kind; }
+  function tagText(q, kind) { return q.script ? q.script(state.tab).tag : kind === "misroute" ? q.type : kind; }
   function count(S) { return S.filter(function (x) { return x.from; }).length; }
 
   function renderPanels(S, upto) {
@@ -553,10 +629,11 @@ code { font: 12.5px var(--mono); }
 
     var msgs = count(S), seen = S.filter(function (x) { return x.from && x.seen; }).length, base = count(steps(q, "siloed"));
     var v = document.getElementById("verdict");
-    v.className = "verdict" + (kind === "misroute" ? " bad" : kind === "hole" ? " gap" : "");
+    v.className = "verdict" + (kind === "misroute" ? " bad" : kind === "clean" ? "" : " gap");
     v.textContent = "";
     var h1 = document.createElement("div"), goldHole = q.gold && !deskHas(q.gold);
-    if (kind === "clean" && q.kind === "hole") h1.textContent = "Works here: a person's agent holds the arxiv tool, so the hole closes. " + msgs + " messages between agents.";
+    if (q.script) h1.textContent = q.script(state.tab).verdict;
+    else if (kind === "clean" && q.kind === "hole") h1.textContent = "Works here: a person's agent holds the arxiv tool, so the hole closes. " + msgs + " messages between agents.";
     else if (kind === "clean") h1.textContent = "Reaches the right agent in " + msgs + " messages.";
     else if (kind === "hole") h1.textContent = "Hole: " + q.why + (state.tab === "second" ? " Here the request goes to a person instead of a guess." : "");
     else {
@@ -572,7 +649,7 @@ code { font: 12.5px var(--mono); }
     v.appendChild(h1); v.appendChild(s2);
 
     var now = document.getElementById("now"); now.textContent = "";
-    var t = document.createElement("span"); t.className = "tag " + kind; t.textContent = kind === "misroute" ? q.type : kind;
+    var t = document.createElement("span"); t.className = "tag " + kind; t.textContent = tagText(q, kind);
     var qq = document.createElement("span"); qq.className = "q"; qq.textContent = "“" + q.text + "”";
     now.appendChild(t); now.appendChild(qq);
   }
@@ -584,6 +661,12 @@ code { font: 12.5px var(--mono); }
       Array.prototype.forEach.call(svg.querySelectorAll(".node." + c), function (n) { n.classList.remove(c); });
     });
     var kind = kindIn(q, state.tab);
+    if (q.script) {
+      var r = q.script(state.tab);
+      r.wrong.forEach(function (id) { cls("n-" + id, "wrong"); });
+      r.should.forEach(function (id) { cls("n-" + id, "should"); });
+      return;
+    }
     if (kind === "misroute") {
       if (state.tab === "people") { cls("n-" + (q.tool ? HOLDER[q.tool] : q.asker), "wrong"); cls("n-" + (q.goldPerson || q.gold), "should"); }
       else { cls("n-" + q.sentTo, "wrong"); cls("n-" + q.gold, "should"); }
@@ -672,7 +755,7 @@ code { font: 12.5px var(--mono); }
       var b = document.createElement("button"); b.type = "button"; b.className = "query"; b.id = "query-" + q.id;
       b.setAttribute("aria-pressed", q.id === state.q ? "true" : "false");
       var t = document.createElement("span"); t.textContent = q.text;
-      var g = document.createElement("span"); g.className = "tag " + kind; g.textContent = kind === "misroute" ? q.type : kind;
+      var g = document.createElement("span"); g.className = "tag " + kind; g.textContent = tagText(q, kind);
       b.appendChild(t); b.appendChild(g);
       b.addEventListener("click", function () { state.q = q.id; renderQueries(); refresh(); });
       box.appendChild(b);
