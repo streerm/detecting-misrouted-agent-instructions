@@ -75,6 +75,7 @@ svg#net { display: block; width: 100%; min-width: 1000px; height: auto; }
 /* diagram */
 .edge { fill: none; stroke: var(--line); stroke-width: 1.4; }
 .edge.peer { stroke-dasharray: 2 5; }
+.edge.ret { stroke: var(--muted); }
 .edge.stub { stroke: var(--gap); stroke-dasharray: 5 5; }
 .edge.stub.thin { stroke-width: 1; opacity: .55; }
 .trail { fill: none; stroke: var(--accent); stroke-width: 3; stroke-linecap: round; }
@@ -306,7 +307,7 @@ code { font: 12.5px var(--mono); }
   };
 
   TABS.dispatch = { built: true, chip: "closest to what the repo runs",
-    note: "<strong>Coordinator / dispatcher.</strong> A central agent reads the request and transfers it to one specialist, chosen from the specialists' descriptions. That specialist then answers the requester directly. This is pattern 2 in Google's guide to multi-agent patterns in ADK, and it is the closest of these tabs to what the repo runs today: one routing decision, one specialist, no relay. The choice rests on each agent's description, which here is its card, so a vague card is a routing bug." };
+    note: "<strong>Coordinator / dispatcher.</strong> A central agent reads the request and transfers it to one specialist, chosen from the specialists' descriptions. That specialist then answers the requester directly, on its own line back, as in the guide's diagram. This is pattern 2 in Google's guide to multi-agent patterns in ADK, and it is the closest of these tabs to what the repo runs today: one routing decision, one specialist, no relay. The choice rests on each agent's description, which here is its card, so a vague card is a routing bug." };
   TABS.fanout = { built: false,
     note: "<strong>Parallel fan-out / gather.</strong> No routing. The same request goes to every agent at once, each replies or declines, and a synthesiser writes one answer from the replies. This is pattern 3 in Google's guide. Nothing can be sent to the wrong agent, at the cost of calling every agent every time, and the point where the replies gather is a natural place to compare them. Workers cannot feed each other within a round, so a request that needs two steps in order comes back incomplete." };
 
@@ -434,7 +435,8 @@ code { font: 12.5px var(--mono); }
 
   function row2Idx(id) { for (var i = 0; i < ROW2.length; i++) if (ROW2[i].id === id) return i; return -1; }
   function row2Has(id) { for (var i = 0; i < ROW2.length; i++) if (ROW2[i].id === id) return true; return false; }
-  var RAIL1 = 256;
+  var RAIL1 = 256, RET_X = 14;
+  function retY(id) { return P[id].y + P[id].h / 2 + (row2Has(id) ? 13 : 15); }
   function busY(tab) { return tab === "peer" ? 552 : 438; }
   function deskIdx(id) { for (var i = 0; i < DESK.length; i++) if (DESK[i].id === id) return i; return -1; }
 
@@ -447,8 +449,8 @@ code { font: 12.5px var(--mono); }
         return "M" + P.synth.x + "," + P.synth.y + " L" + P.gate.x + "," + P.gate.y + " L" + P.gate.x + "," + mid + " L" + P[w].x + "," + mid + " L" + P[w].x + "," + (P[w].y - P[w].h / 2);
       }
       if (has("req") && !has("orch") && !has("synth")) {
-        var v = a === "req" ? b : a, m2 = row2Has(v) ? busY(tab) : RAIL1;
-        return "M" + P.req.x + "," + P.req.y + " L" + P.orch.x + "," + P.orch.y + " L" + P.gate.x + "," + m2 + " L" + P[v].x + "," + m2 + " L" + P[v].x + "," + (P[v].y - P[v].h / 2);
+        var v = a === "req" ? b : a, ry = retY(v);
+        return "M" + P.req.x + "," + P.req.y + " L" + RET_X + "," + P.req.y + " L" + RET_X + "," + ry + " L" + P[v].x + "," + ry + " L" + P[v].x + "," + (P[v].y + P[v].h / 2);
       }
       if (has("orch") && has("req")) return "M" + P.req.x + "," + P.req.y + " L" + P.orch.x + "," + P.orch.y;
       if (has("orch") && has("human")) return "M" + P.orch.x + "," + P.orch.y + " L" + P.gate.x + "," + P.gate.y + " L" + P.human.x + "," + P.human.y;
@@ -883,7 +885,7 @@ code { font: 12.5px var(--mono); }
     var tab = state.tab;
     build(tab);
     while (svg.lastChild && svg.lastChild.nodeName !== "title") svg.removeChild(svg.lastChild);
-    svg.setAttribute("viewBox", "0 0 " + W + " " + (tab === "people" ? 780 : tab === "peer" ? 872 : 650));
+    svg.setAttribute("viewBox", "0 0 " + W + " " + (tab === "people" ? 780 : tab === "peer" ? 872 : tab === "dispatch" ? 662 : 650));
     layers.edges = el("g", {}, svg); layers.trails = el("g", {}, svg); layers.nodes = el("g", {}, svg); layers.top = el("g", {}, svg);
     var i, j;
     if (tab === "people") {
@@ -908,13 +910,21 @@ code { font: 12.5px var(--mono); }
         el("path", { "class": "edge peer", d: "M" + P.synth.x + "," + P.synth.y + " L" + P.gate.x + "," + P.gate.y }, layers.edges);
         el("path", { "class": "edge peer", d: pathD(tab, "synth", "req") }, layers.edges);
       }
+      if (tab === "dispatch") {
+        var r1 = retY(DESK[0].id), r2 = retY(ROW2[0].id);
+        el("path", { "class": "edge ret", d: "M" + P.req.x + "," + P.req.y + " L" + RET_X + "," + P.req.y + " L" + RET_X + "," + r2 + " L" + P[ROW2[ROW2.length - 1].id].x + "," + r2 + " M" + RET_X + "," + r1 + " L" + P[DESK[DESK.length - 1].id].x + "," + r1 }, layers.edges);
+        DESK.forEach(function (a) { el("path", { "class": "edge ret", d: "M" + P[a.id].x + "," + (P[a.id].y + P[a.id].h / 2) + " L" + P[a.id].x + "," + r1 }, layers.edges); });
+        ROW2.forEach(function (a) { el("path", { "class": a.cls === "hole" ? "edge stub" : "edge peer", d: "M" + P[a.id].x + "," + (P[a.id].y + P[a.id].h / 2) + " L" + P[a.id].x + "," + r2 }, layers.edges); });
+        el("text", { x: 24, y: 126, "class": "sub" }, layers.top, "answers come straight back");
+        el("text", { x: 24, y: 141, "class": "sub" }, layers.top, "on this line, not via the coordinator");
+      }
       var by = busY(tab);
       el("path", { "class": "edge", d: "M" + P.gate.x + "," + (P.gate.y + P.gate.h / 2) + " L" + P.gate.x + "," + by + " M" + P[ROW2[0].id].x + "," + by + " L" + P[ROW2[ROW2.length - 1].id].x + "," + by }, layers.edges);
       ROW2.forEach(function (a) {
         el("path", { "class": a.cls === "hole" ? "edge stub" : "edge peer", d: "M" + P[a.id].x + "," + by + " L" + P[a.id].x + "," + (P[a.id].y - P[a.id].h / 2) }, layers.edges);
       });
       el("path", { "class": "edge peer", d: "M" + P.orch.x + "," + P.orch.y + " L" + P.model.x + "," + P.model.y }, layers.edges);
-      el("text", { x: 600, y: tab === "peer" ? 838 : 626, "text-anchor": "middle", "class": "note" }, layers.top,
+      el("text", { x: 600, y: tab === "peer" ? 838 : tab === "dispatch" ? 640 : 626, "text-anchor": "middle", "class": "note" }, layers.top,
         tab === "peer" ? "both rows are wired the same way, each with its own peer links (links between rows are not drawn)"
           : "both rows are wired the same way · outline and line style show what exists: solid built, dotted proposed, dashed missing · Source A to C are placeholders");
     }
