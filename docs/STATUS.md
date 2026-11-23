@@ -1,6 +1,6 @@
 # Status: what is here, what is not
 
-Last updated 20 Nov 2026. This is the public status page for the repo. It is a prototype scaffold for a student team project (Oxford Edge AI/ML Challenge, spec 41: "Detecting Misrouted Instructions in Hierarchical Agent Systems"), built in a few days. **No team decision has been made yet on direction, use case or framework**, and the quant research desk here is an example, not the project.
+Last updated 23 Nov 2026. This is the public status page for the repo. It is a prototype scaffold for a student team project (Oxford Edge AI/ML Challenge, spec 41: "Detecting Misrouted Instructions in Hierarchical Agent Systems"), built in a few days. **No team decision has been made yet on direction, use case or framework**, and the quant research desk here is an example, not the project.
 
 Read the repo as a buffet: it has more components than a six-week project will use, so the team can choose. Nothing here implements a full architecture.
 
@@ -8,7 +8,7 @@ Read the repo as a buffet: it has more components than a six-week project will u
 
 - **No request has been routed or answered by a real model.** Every test and demo run uses an offline `echo` model. The demo's perfect scores are a plumbing check, not a result: the injected faults and the keyword detector share one vocabulary.
 - The data tools are real: eleven tool servers start, and ten have returned live data from direct calls.
-- The wiring page (`docs/research-desk-wiring.html`) is a drawing with scripted traces. Only one of its four wirings exists in code, and only for a single hop.
+- The wiring page (`docs/research-desk-wiring.html`) is a drawing with scripted traces. Of its six wirings, only a single routing hop exists in code (closest to the coordinator / dispatcher tab).
 
 ## What works (tested)
 
@@ -37,7 +37,7 @@ These have code and configuration but have never been run for real.
 
 - A gate that decides between routing and deferring to a person, and any calibration or statistical guarantee. Where that sits is deliberately open.
 - A decision model (for example Jev) or a text diffusion model (for example d1) as router. Named on the wiring page as candidates only.
-- Peer-to-peer, per-person and second-opinion wirings. Drawn, not built.
+- Peer-to-peer, per-person, second-opinion and parallel fan-out / gather wirings. Drawn, not built. The last, and the coordinator / dispatcher tab, follow Google's guide to multi-agent patterns in ADK.
 - Research agents that collect from the web, a signal compiler, a data-analysis agent, subject-expert agents, a positions agent. Proposals on the wiring page; "Source A" to "Source C" are placeholders.
 - A real request set, labelled data, traces in Langfuse, a reproduced baseline.
 - A licence. Until the team picks one, the code is public to read but not licensed for reuse (the vendored skills keep their own Apache 2.0 licence).

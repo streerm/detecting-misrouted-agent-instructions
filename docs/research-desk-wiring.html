@@ -155,6 +155,7 @@ svg#net { display: block; width: 100%; min-width: 1000px; height: auto; }
 .holegroup li { font-size: 14px; }
 .holegroup b { font-weight: 600; display: block; }
 .holegroup li span { color: var(--muted); }
+footer a { color: var(--accent); }
 footer { color: var(--muted); font-size: 13px; max-width: 80ch; display: flex; flex-direction: column; gap: 6px; }
 code { font: 12.5px var(--mono); }
 @media (prefers-reduced-motion: reduce) { .switch .track::after { transition: none; } }
@@ -164,7 +165,7 @@ code { font: 12.5px var(--mono); }
   <header>
     <p class="status">DRAFT · 20 NOV 2026 · EXAMPLE DESK, NOT A TEAM DECISION · NOTHING HERE IS ROUTED BY A REAL MODEL YET</p>
     <h1>Research Desk Wiring</h1>
-    <p class="lede">One orchestrator, six specialist agents and eleven tool servers, drawn four ways. Solid boxes are built and tested. Dotted boxes are proposals and dashed amber boxes are missing pieces: neither is in the repo. Every box is used by at least one example, so the proposed and missing ones are shown as they would work if built, in dashed amber. The traces are scripted illustrations of how a request would travel. None is a recording of a real run, and results are described, never given as figures.</p>
+    <p class="lede">One orchestrator, six specialist agents and eleven tool servers, drawn six ways. Solid boxes are built and tested. Dotted boxes are proposals and dashed amber boxes are missing pieces: neither is in the repo. Every box is used by at least one example, so the proposed and missing ones are shown as they would work if built, in dashed amber. The traces are scripted illustrations of how a request would travel. None is a recording of a real run, and results are described, never given as figures.</p>
     <p class="callout"><strong>Read this as a buffet, not a build plan.</strong> It shows more components and wirings than a six-week project will use, so the team can choose. What is real today: seven agent cards, eleven tool servers that answer direct calls, and detectors that run offline. No request has been routed or answered by a real model, and no architecture on this page is fully implemented.</p>
   </header>
 
@@ -173,6 +174,8 @@ code { font: 12.5px var(--mono); }
     <button class="tab" role="tab" id="tab-peer" data-tab="peer">Hierarchy with peer links</button>
     <button class="tab" role="tab" id="tab-people" data-tab="people">One agent per person</button>
     <button class="tab" role="tab" id="tab-second" data-tab="second">Second opinion</button>
+    <button class="tab" role="tab" id="tab-dispatch" data-tab="dispatch">Coordinator / dispatcher</button>
+    <button class="tab" role="tab" id="tab-fanout" data-tab="fanout">Parallel fan-out / gather</button>
   </div>
   <p class="tabnote" id="tabnote"></p>
 
@@ -227,7 +230,7 @@ code { font: 12.5px var(--mono); }
       <div class="holegroup"><h3>Detection and control</h3><ul>
         <li><b>Detectors in the graph</b><span>Four exist in code (capability-profile check, contrastive output, self-report, tool-call). None sits on a wire that runs.</span></li>
         <li><b>Gate and calibration</b><span>Nothing decides between "route it" and "ask a human", and no threshold is calibrated.</span></li>
-        <li><b>Three of the four wirings</b><span>Peer links, one agent per person and second opinion are drawn, not built. The repo does one hop: router to one specialist.</span></li>
+        <li><b>Most of the six wirings</b><span>Peer links, one agent per person, second opinion and parallel fan-out are drawn, not built. The repo does one hop, router to one specialist, which is closest to the coordinator / dispatcher tab.</span></li>
         <li><b>Statistical guarantees</b><span>Where calibration, confidence gating and deferral sit is open, for the statisticians on the team to place. The circles with a bell curve mark candidate places along the wires: is the route right, is the returned data valid, is the answer valid.</span></li>
         <li><b>Which model routes</b><span>A decision model (Jev), a reasoning diffusion model (d1) and other text diffusion models are named as candidates only. None has been tried against the keyword and LLM routers.</span></li>
       </ul></div>
@@ -241,7 +244,7 @@ code { font: 12.5px var(--mono); }
   </section>
 
   <footer>
-    <p>Agents and tools are read from the repo's cards and <code>.mcp.json</code> as of 20 Nov 2026. The four misroute names quote spec 41 exactly. The misroute examples come from a team discussion on 18 Nov. The four structures are candidate wirings for the rewiring experiment, not decisions, and the split of tools between people is invented for illustration.</p>
+    <p>Agents and tools are read from the repo's cards and <code>.mcp.json</code> as of 20 Nov 2026. The four misroute names quote spec 41 exactly. The misroute examples come from a team discussion on 18 Nov. The coordinator / dispatcher and parallel fan-out / gather tabs follow patterns 2 and 3 in Google's <a href="https://developers.googleblog.com/developers-guide-to-multi-agent-patterns-in-adk/">Developer's guide to multi-agent patterns in ADK</a> (16 Dec 2025), applied to this desk; the worked examples there are a support bot and a code-review swarm, not finance. The six structures are candidate wirings for the rewiring experiment, not decisions, and the split of tools between people is invented for illustration.</p>
   </footer>
 </div>
 
@@ -288,7 +291,7 @@ code { font: 12.5px var(--mono); }
     p.tools.forEach(function (t) { HOLDER[t] = p.id; });
   });
 
-  var LABEL = { req: "Requester", orch: "Orchestrator", gate: "Detectors and deferral gate", human: "Human reviewer", stat: "Statistical check ?", model: "Router model" };
+  var LABEL = { req: "Requester", orch: "Orchestrator", synth: "Synthesiser", gate: "Detectors and deferral gate", human: "Human reviewer", stat: "Statistical check ?", model: "Router model" };
   DESK.concat(ROW2, PEOPLE).forEach(function (a) { LABEL[a.id] = a.name; });
 
   var TABS = {
@@ -301,6 +304,11 @@ code { font: 12.5px var(--mono); }
     second: { built: false,
       note: "<strong>Second opinion.</strong> The siloed hierarchy plus a check on the wire. The orchestrator sends each request to the agent it picked and to its runner-up, and the detectors-and-gate box, switched on here, compares the two replies. A refusal from the runner-up supports the routing; two different answers go to a person. It is a version of the spec's contrastive output detector. It doubles the work, and it misses a misroute when both agents are wrong in the same way." }
   };
+
+  TABS.dispatch = { built: true, chip: "closest to what the repo runs",
+    note: "<strong>Coordinator / dispatcher.</strong> A central agent reads the request and transfers it to one specialist, chosen from the specialists' descriptions. That specialist then answers the requester directly. This is pattern 2 in Google's guide to multi-agent patterns in ADK, and it is the closest of these tabs to what the repo runs today: one routing decision, one specialist, no relay. The choice rests on each agent's description, which here is its card, so a vague card is a routing bug." };
+  TABS.fanout = { built: false,
+    note: "<strong>Parallel fan-out / gather.</strong> No routing. The same request goes to every agent at once, each replies or declines, and a synthesiser writes one answer from the replies. This is pattern 3 in Google's guide. Nothing can be sent to the wrong agent, at the cost of calling every agent every time, and the point where the replies gather is a natural place to compare them. Workers cannot feed each other within a round, so a request that needs two steps in order comes back incomplete." };
 
   // stages are in dependency order; the last stage's agent owns the answer.
   var QUERIES = [
@@ -412,9 +420,11 @@ code { font: 12.5px var(--mono); }
       return;
     }
     add({ id: "req", cls: "", name: "Requester", lines: [], center: true, x: 120, y: 70, w: 160, h: 48 });
-    add({ id: "orch", cls: "hub", name: "Orchestrator", lines: ["router card · catalogue"], center: true, x: 600, y: 70, w: 260, h: 70 });
+    add({ id: "orch", cls: "hub", name: tab === "dispatch" ? "Coordinator" : "Orchestrator",
+      lines: [tab === "dispatch" ? "routes by agent descriptions" : tab === "fanout" ? "no routing: sends to every agent" : "router card · catalogue"], center: true, x: 600, y: 70, w: 260, h: 70 });
+    if (tab === "fanout") add({ id: "synth", cls: "idea", name: "Synthesiser", lines: ["one answer from all replies"], center: true, x: 170, y: 184, w: 270, h: 54 });
     if (tab === "second") add({ id: "gate", cls: "idea", name: "Detectors and deferral gate", lines: ["switched on here: compares two replies"], center: true, x: 600, y: 184, w: 330, h: 54 });
-    else add({ id: "gate", cls: "hole", name: "Detectors and deferral gate", lines: ["not built: messages pass unchecked"], center: true, x: 600, y: 184, w: 330, h: 54 });
+    else add({ id: "gate", cls: "hole", name: "Detectors and deferral gate", lines: [tab === "fanout" ? "replies gather here: nothing compares them" : "not built: messages pass unchecked"], center: true, x: 600, y: 184, w: 330, h: 54 });
     add({ id: "human", cls: "hole", name: "Human reviewer", lines: ["not built"], center: true, x: 1060, y: 184, w: 180, h: 54 });
     DESK.forEach(function (a, i) { add({ id: a.id, cls: "", name: a.name, lines: a.tools, chips: true, x: 105 + i * 198, y: 356, w: 172, h: 104 }); });
     ROW2.forEach(function (a, i) { add({ id: a.id, cls: a.cls, name: a.name, lines: a.lines, chips: !!a.chips, x: 96 + i * 168, y: tab === "peer" ? 650 : 540, w: 156, h: 122 }); });
@@ -432,6 +442,14 @@ code { font: 12.5px var(--mono); }
     var A = P[a], B = P[b];
     if (tab !== "people") {
       var has = function (x) { return a === x || b === x; }, other = a === "orch" ? b : a;
+      if (has("synth") && !has("req")) {
+        var w = a === "synth" ? b : a, mid = row2Has(w) ? busY(tab) : RAIL1;
+        return "M" + P.synth.x + "," + P.synth.y + " L" + P.gate.x + "," + P.gate.y + " L" + P.gate.x + "," + mid + " L" + P[w].x + "," + mid + " L" + P[w].x + "," + (P[w].y - P[w].h / 2);
+      }
+      if (has("req") && !has("orch") && !has("synth")) {
+        var v = a === "req" ? b : a, m2 = row2Has(v) ? busY(tab) : RAIL1;
+        return "M" + P.req.x + "," + P.req.y + " L" + P.orch.x + "," + P.orch.y + " L" + P.gate.x + "," + m2 + " L" + P[v].x + "," + m2 + " L" + P[v].x + "," + (P[v].y - P[v].h / 2);
+      }
       if (has("orch") && has("req")) return "M" + P.req.x + "," + P.req.y + " L" + P.orch.x + "," + P.orch.y;
       if (has("orch") && has("human")) return "M" + P.orch.x + "," + P.orch.y + " L" + P.gate.x + "," + P.gate.y + " L" + P.human.x + "," + P.human.y;
       if (has("orch") && row2Has(other)) return "M" + P.orch.x + "," + P.orch.y + " L" + P.gate.x + "," + (P.gate.y + P.gate.h / 2) + " L" + P.gate.x + "," + busY(tab) + " L" + P[other].x + "," + busY(tab) + " L" + P[other].x + "," + (P[other].y - P[other].h / 2);
@@ -580,8 +598,139 @@ code { font: 12.5px var(--mono); }
     };
   }
 
+  // ---------- two patterns from Google's guide to multi-agent patterns in ADK
+  function qq(q) { return "\"" + short(q.text, 70) + "\""; }
+  var OUT = "OUT_OF_PROFILE: nothing to add";
+  var TRANSCRIPT_CALL = "earnings_call_transcript(symbol, quarter, contains=\"margin\")";
+  var TRENDS_CALL = "edgar_trends(identifier=\"NKE\", concepts=[\"Inventory\", \"Revenue\"])";
+  var PAPERS_CALL = "search_papers(query=\"all:\\\"conformal prediction\\\" AND all:routing\")";
+
+  // Coordinator / dispatcher: one routing decision, one specialist, which answers the requester directly.
+  var DISPATCH = {
+    q3: { to: "backtest", does: "has no prices and no way to ask the Market data agent", call: "need: adjusted daily closes for SPY · no route to get them", stepTone: "gap",
+      says: "\"I need the price series supplied before I can run this.\"", tone: "gap", kind: "limited", tag: "needs two agents",
+      verdict: "A dispatcher hands the whole request to one specialist. This one needs two, and the Backtest agent has no way to reach the Market data agent." },
+    q6: { to: "market", says: "\"Yes, it's in the store.\"", tone: "bad", kind: "misroute", tag: "authority mismatch", wrong: ["market"], should: ["compliance"],
+      verdict: "Misroute: authority mismatch. Should have gone to Compliance. The wrong answer goes straight to the requester, so nothing after the routing decision can catch it." },
+    q7: { to: "market", tool: "alphavantage", call: "TOOL_CALL(\"WTI\", interval=\"monthly\")", does: "calls a tool that answers a different question",
+      says: "an oil price history · source Alpha Vantage", tone: "bad", kind: "misroute", tag: "semantic misinterpretation", wrong: ["market"], should: ["positions"],
+      verdict: "Misroute: semantic misinterpretation. Should have gone to Positions, which does not exist. The plausible answer goes straight to the requester." },
+    q10: { pre: [["model", "the coordinator's model has only these words to choose from", "choose(agent | \"it\", \"the level we discussed\") → no clear match"]],
+      to: "market", tool: "alphavantage", call: "TOOL_CALL(\"GLOBAL_QUOTE\", symbol=?)", does: "has to guess the instrument too",
+      says: "\"Yes, it is above.\" (instrument and level both guessed)", tone: "bad", kind: "limited", tag: "limited context", wrong: ["market"],
+      verdict: "Limited context: the request names no instrument and no level. The coordinator guesses, the specialist guesses again, and the answer goes straight back." },
+    q11: { to: "filings", says: "\"I don't know, but the News agent does: it holds call transcripts.\"", tone: "gap", routeTone: "bad", kind: "misroute", tag: "capability mismatch", wrong: ["filings"], should: ["news"],
+      verdict: "Misroute: capability mismatch. The Filings agent says who knows, but in a pure dispatcher it cannot hand the request on, so the requester has to ask again." },
+    q16: { to: "compliance", tool: "sanctions", call: "screen_name(name=\"<counterparty>\")", does: "screens the counterparty",
+      says: "\"Screening done. Approval needs a human sign-off.\"", tone: "gap", kind: "proposed", tag: "needs a person",
+      post: [["gate", "a deferral gate would pick this up, if it were built", "defer(reason=\"approval needs a person\")"], ["human", "would be asked to sign off: no reviewer exists", "request for sign-off"]],
+      verdict: "The screening works today. Handing the approval to a person needs a deferral gate and a reviewer, and neither is built." },
+    q8: { to: "papers", does: "would search arXiv: the server works, but no agent holds it", call: PAPERS_CALL, says: "paper list with dates, authors and links", tone: "gap", kind: "proposed", tag: "needs a missing agent",
+      verdict: "Would work if a research-papers agent existed. Today the coordinator has no description to match this request to." },
+    q12: { to: "collector", tool: "Source A", call: "collect(sources=[\"Source A\", \"Source B\"], topic=\"container shipping rates\", since=\"7 days\")", does: "would collect dated items from its sources",
+      says: "collected items only: nothing compiles them into a signal", tone: "gap", kind: "proposed", tag: "needs proposed agents",
+      post: [["signals", "would be needed next to build the signal: a dispatcher does not reach it", "not called"]],
+      verdict: "The collector could gather items, but a dispatcher sends to one agent, so nothing compiles the signal. Both agents are proposals." },
+    q13: { to: "filings", tool: "edgartools", call: TRENDS_CALL, does: "reads inventory and revenue by quarter",
+      says: "inventory and revenue by quarter: the comparison with history is not done", tone: "gap", routeTone: "ok", kind: "proposed", tag: "needs proposed agents",
+      post: [["analysis", "would be needed next for the comparison with history: not reached, not built", "not called"], ["sme", "would be needed after that for the expert reading: not reached, not built", "not called"]],
+      verdict: "The Filings agent returns the raw series. The comparison and the expert reading need two more agents, which a dispatcher does not reach and which are not built." },
+    q14: { to: "positions", does: "would read the positions book: no such data exists here", call: "weights(group_by=\"sector\", as_of=<date>)", says: "the energy weight with its as-of date", tone: "gap", kind: "proposed", tag: "needs a missing agent",
+      verdict: "Would work if a positions agent and its data existed." },
+    q15: { to: "docs", does: "would search the meeting notes: nothing is built", call: "search_notes(query=\"momentum strategy\", month=<last month>)", says: "the conclusion, quoted from the note, with its date", tone: "gap", kind: "proposed", tag: "needs a missing agent",
+      verdict: "Would work if an internal-documents agent existed. Nothing is built and there is no document store." }
+  };
+
+  // Parallel fan-out / gather: no routing. Every agent gets the request at once; a synthesiser combines the replies.
+  var FANOUT = {
+    q3: { replies: [{ agent: "market", tool: "alphavantage", call: "TOOL_CALL(\"TIME_SERIES_DAILY_ADJUSTED\", symbol=\"SPY\")", does: "fetches adjusted daily closes for SPY", says: "adjusted daily closes with dates · source Alpha Vantage" },
+        { agent: "backtest", does: "cannot run: the prices are being fetched in the same round, not before it", call: "need: closes for SPY · not available yet", says: "\"I need prices first. Nothing to report.\"", tone: "gap" }],
+      synth: "the price series only: the backtest did not run", synthTone: "gap", kind: "limited", tag: "needs two rounds",
+      verdict: "Parallel workers cannot feed each other. The prices and the backtest are asked for at the same moment, so the backtest has nothing to run on. This needs a second round or a sequential step." },
+    q6: { replies: [{ agent: "market", says: "\"Yes, it's in the store.\"", tone: "bad" }, { agent: "compliance", says: "\"Needs compliance approval. This one is mine.\"" }],
+      synth: "\"It's in the store, but it needs compliance approval before use.\"", synthTone: "gap", kind: "recovered", tag: "authority mismatch · visible", wrong: ["market"], should: ["compliance"],
+      verdict: "No routing, so the data agent and the compliance agent both reply and the conflict is visible where the replies are gathered. It is only safe if the synthesiser lets the compliance reply win instead of blending the two." },
+    q7: { replies: [{ agent: "market", tool: "alphavantage", call: "TOOL_CALL(\"WTI\", interval=\"monthly\")", does: "calls a tool that answers a different question", says: "an oil price history · source Alpha Vantage", tone: "bad" },
+        { agent: "macro", says: "an oil price series too · source FRED", tone: "bad" }],
+      synth: "an oil price summary", synthTone: "bad", kind: "misroute", tag: "semantic misinterpretation", wrong: ["market", "macro"], should: ["positions"],
+      verdict: "Asking everyone does not help when no agent holds the positions. Two agents answer the wrong question and the synthesiser combines them into one plausible answer." },
+    q10: { replies: [{ agent: "market", tool: "alphavantage", call: "TOOL_CALL(\"GLOBAL_QUOTE\", symbol=?)", does: "has to guess the instrument", says: "a price for a guessed ticker · source Alpha Vantage", tone: "bad" }],
+      post: [["model", "the synthesiser's model writes one answer from one guess and five refusals", "synthesise → weak support"]],
+      synth: "\"Yes, it is above.\" (one guess, five refusals)", synthTone: "bad", kind: "limited", tag: "limited context", wrong: ["market"],
+      verdict: "Limited context: five agents decline and one guesses. The weak support is visible where the replies are gathered, but only if something counts the refusals." },
+    q11: { replies: [{ agent: "news", tool: "news", call: TRANSCRIPT_CALL, does: "reads the transcript and filters for margins", says: "quoted turns with speakers · source Alpha Vantage" },
+        { agent: "filings", says: "\"Not mine: the News agent holds call transcripts.\"" }],
+      synth: "quotes with speaker and quarter", kind: "clean", tag: "clean",
+      verdict: "No routing, so nothing to misroute: the News agent answers and the others decline." },
+    q16: { replies: [{ agent: "compliance", tool: "sanctions", call: "screen_name(name=\"<counterparty>\")", does: "screens the counterparty", says: "\"Screening done. Approval needs a human sign-off.\"" }],
+      post: [["gate", "a deferral gate would pick this up, if it were built", "defer(reason=\"approval needs a person\")"], ["human", "would be asked to sign off: no reviewer exists", "request for sign-off"]],
+      synth: "\"Screened. Waiting for a person to approve.\"", synthTone: "gap", kind: "proposed", tag: "needs a person",
+      verdict: "The screening works today. Handing the approval to a person needs a deferral gate and a reviewer, and neither is built." },
+    q8: { extra: ["papers"], replies: [{ agent: "papers", does: "would search arXiv: the server works, but no agent holds it", call: PAPERS_CALL, says: "paper list with abstracts · source arXiv API", tone: "gap" }],
+      synth: "paper list with dates, authors and links", synthTone: "gap", kind: "proposed", tag: "needs a missing agent",
+      verdict: "Would work if a research-papers agent were one of the workers. Today all six built agents would decline." },
+    q12: { extra: ["collector", "signals"], replies: [{ agent: "collector", tool: "Source A", call: "collect(sources=[\"Source A\", \"Source B\"], topic=\"container shipping rates\", since=\"7 days\")", does: "would collect dated items from its sources", says: "dated, linked items · Source A and Source B (placeholders)", tone: "gap" },
+        { agent: "signals", does: "would need the collected items first, and they arrive in the same round", call: "need: collected items · not available yet", says: "\"Nothing to compile yet.\"", tone: "gap" }],
+      synth: "collected items only: no signal", synthTone: "gap", kind: "proposed", tag: "needs proposed agents",
+      verdict: "Collecting and compiling are two steps in order, which one parallel round cannot do. Both agents are proposals." },
+    q13: { extra: ["analysis", "sme"], replies: [{ agent: "filings", tool: "edgartools", call: TRENDS_CALL, does: "reads inventory and revenue by quarter", says: "inventory and revenue by quarter, with periods · source 10-Q and 10-K" },
+        { agent: "analysis", does: "would need the filings data first", call: "need: inventory and revenue series · not available yet", says: "\"Nothing to analyse yet.\"", tone: "gap" },
+        { agent: "sme", does: "would need the statistic first", call: "need: the comparison with history · not available yet", says: "\"Nothing to interpret yet.\"", tone: "gap" }],
+      synth: "the raw series only: no comparison, no reading", synthTone: "gap", kind: "proposed", tag: "needs proposed agents",
+      verdict: "The Filings agent returns the raw series. Analysis and the expert reading depend on it, so they cannot run in the same round, and neither agent is built." },
+    q14: { extra: ["positions"], replies: [{ agent: "positions", does: "would read the positions book: no such data exists here", call: "weights(group_by=\"sector\", as_of=<date>)", says: "sector weights with an as-of date · source: positions book (missing)", tone: "gap" }],
+      synth: "the energy weight with its as-of date", synthTone: "gap", kind: "proposed", tag: "needs a missing agent",
+      verdict: "Would work if a positions agent and its data existed. Today all six built agents would decline." },
+    q15: { extra: ["docs"], replies: [{ agent: "docs", does: "would search the meeting notes: nothing is built", call: "search_notes(query=\"momentum strategy\", month=<last month>)", says: "the relevant note, quoted, with its date", tone: "gap" }],
+      synth: "the conclusion, quoted from the note, with its date", synthTone: "gap", kind: "proposed", tag: "needs a missing agent",
+      verdict: "Would work if an internal-documents agent existed. Today all six built agents would decline." }
+  };
+
+  function patternPlan(q, tab) {
+    var s = [], Q = qq(q), st = q.stages && q.stages[0], d;
+    function notes(list, tone) { (list || []).forEach(function (n) { s.push(note(n[0], n[1], tone || "gap", n[2])); }); }
+    if (tab === "dispatch") {
+      d = DISPATCH[q.id] || { to: st.agent, tool: st.tool, call: st.call, does: st.does, says: q.answer, tone: "ok", kind: "clean", tag: "clean",
+        verdict: "Reaches the right agent. The specialist answers the requester directly, so the coordinator never sees the answer." };
+      var rt = d.routeTone || (d.tone === "bad" ? "bad" : row2Has(d.to) ? "gap" : "ok");
+      s.push(msg("req", "orch", "asks the question", "ok", true, Q));
+      notes(d.pre);
+      s.push(msg("orch", d.to, rt === "bad" ? "transfers the request to the wrong specialist" : "transfers the request to one specialist, chosen from the descriptions", rt, true, "transfer → " + Q));
+      if (d.tool) s.push(tool(d.to, d.tool, d.does, d.stepTone || (d.tone === "bad" ? "bad" : row2Has(d.to) ? "gap" : "ok"), d.call));
+      else if (d.does) s.push(note(d.to, d.does, d.stepTone || "gap", d.call));
+      s.push(msg(d.to, "req", "answers the requester directly", d.tone, false, d.says));
+      notes(d.post);
+      return { S: s, kind: d.kind, tag: d.tag, wrong: d.wrong || [], should: d.should || [], verdict: d.verdict };
+    }
+    d = FANOUT[q.id] || { replies: [{ agent: st.agent, tool: st.tool, call: st.call, does: st.does, says: st.result }], synth: q.answer, kind: "clean", tag: "clean",
+      verdict: "No routing, so nothing to misroute: the right agent answers and the others decline." };
+    var workers = DESK.map(function (a) { return a.id; }).concat(d.extra || []), by = {};
+    d.replies.forEach(function (r) { by[r.agent] = r; });
+    function wt(id) { return by[id] && by[id].tone ? by[id].tone : row2Has(id) ? "gap" : "ok"; }
+    s.push(msg("req", "orch", "asks the question", "ok", true, Q));
+    workers.forEach(function (w) { var m = msg("orch", w, "sends the same request to every agent at once", row2Has(w) ? "gap" : "ok", true, "fan-out → " + Q); m.g = 1; s.push(m); });
+    d.replies.forEach(function (r) {
+      var x = r.tool ? tool(r.agent, r.tool, r.does, wt(r.agent), r.call) : r.does ? note(r.agent, r.does, wt(r.agent), r.call) : null;
+      if (x) { x.g = 2; s.push(x); }
+    });
+    workers.forEach(function (w) {
+      var m = msg(w, "synth", by[w] ? "returns its reply" : "declines: outside its card", wt(w), true, by[w] ? by[w].says : OUT); m.g = 3; s.push(m);
+    });
+    s.push(note("synth", "writes one answer from " + workers.length + " replies", d.synthTone || "ok", "synthesise(" + d.replies.length + " answers, " + (workers.length - d.replies.length) + " refusals)"));
+    notes(d.post);
+    s.push(msg("synth", "req", "returns the combined answer", d.synthTone || "ok", true, d.synth));
+    return { S: s, kind: d.kind, tag: d.tag, wrong: d.wrong || [], should: d.should || [], verdict: d.verdict };
+  }
+
+  function plan(q, tab) {
+    if (tab === "dispatch" || tab === "fanout") return patternPlan(q, tab);
+    return q.script ? q.script(tab) : null;
+  }
+  function lab(id) { return id === "orch" && state.tab === "dispatch" ? "Coordinator" : LABEL[id]; }
+
   function steps(q, tab) {
-    if (q.script) return q.script(tab).S;
+    var pl = plan(q, tab);
+    if (pl) return pl.S;
     var s = [], Q = "\"" + short(q.text, 70) + "\"", st = q.stages || [], owner = st[st.length - 1], deps = st.slice(0, -1);
 
     if (tab === "people") {
@@ -681,6 +830,9 @@ code { font: 12.5px var(--mono); }
     var t = state.tab;
     if (id === "gate") return "<b>Detectors</b> are checks that ask whether a request reached the wrong agent. Four exist in the repo as functions (capability-profile check, contrastive output, self-report, tool-call) and have only run in the offline demo.<br><br><b>The deferral gate</b> is the decision that follows: send the request on, or hand it to a person. It is not built.<br><br>The orchestrator could do both jobs itself. They are drawn as a separate box so the check is visible.<br><br><b>On this tab:</b> " +
       (t === "second" ? "switched on. It waits for the picked agent's reply and the runner-up's, then compares them." : t === "people" ? "there is no central point where every message passes, so there is no obvious place for it." : "not active. Messages pass through unchecked, which is why the misroutes get through.");
+    if (id === "synth") return "<b>Synthesiser.</b> Reads every agent's reply and writes one answer. Not in the repo. In Google's pattern this agent runs after the parallel workers and reads what each of them wrote.";
+    if (id === "orch" && t === "dispatch") return "<b>Coordinator.</b> Reads the request and transfers it to one specialist, chosen by a model from the specialists' descriptions. After the transfer it is out of the conversation. In the repo this is the router card, run so far with keyword matching only.";
+    if (id === "orch" && t === "fanout") return "<b>Orchestrator, without routing.</b> Sends the same request to every agent at once and makes no choice between them.";
     if (id === "human") return "<b>Human reviewer.</b> A person who receives requests the system should not answer on its own. Not built: today there is nobody to defer to.";
     if (id === "model") return "<b>Which model makes the choice.</b> Today a keyword router, with an LLM router wired but never run. Named as candidates only: a decision model (Jev) and text diffusion models (d1). None has been tried.";
     if (id === "orch") return "<b>Orchestrator.</b> Reads each request and sends it to one specialist. In the repo this is the router card, and it has only been run with keyword matching.";
@@ -752,6 +904,10 @@ code { font: 12.5px var(--mono); }
           el("path", { "class": "edge peer", d: pathD(tab, ROW2[i].id, ROW2[j].id) }, layers.edges);
       }
       el("path", { "class": "edge stub", d: "M" + P.gate.x + "," + P.gate.y + " L" + P.human.x + "," + P.human.y }, layers.edges);
+      if (tab === "fanout") {
+        el("path", { "class": "edge peer", d: "M" + P.synth.x + "," + P.synth.y + " L" + P.gate.x + "," + P.gate.y }, layers.edges);
+        el("path", { "class": "edge peer", d: pathD(tab, "synth", "req") }, layers.edges);
+      }
       var by = busY(tab);
       el("path", { "class": "edge", d: "M" + P.gate.x + "," + (P.gate.y + P.gate.h / 2) + " L" + P.gate.x + "," + by + " M" + P[ROW2[0].id].x + "," + by + " L" + P[ROW2[ROW2.length - 1].id].x + "," + by }, layers.edges);
       ROW2.forEach(function (a) {
@@ -797,14 +953,14 @@ code { font: 12.5px var(--mono); }
 
   // ---------- panels ----------
   function hopText(st) {
-    if (st.toolOf) return LABEL[st.toolOf] + " ⚙ " + st.tool;
+    if (st.toolOf) return lab(st.toolOf) + " ⚙ " + st.tool;
     if (st.at === "model" && state.tab === "people") return "Agent's model";
-    if (st.at) return LABEL[st.at];
-    return LABEL[st.from] + " → " + LABEL[st.to];
+    if (st.at) return lab(st.at);
+    return lab(st.from) + " → " + lab(st.to);
   }
   function currentQ() { for (var i = 0; i < QUERIES.length; i++) if (QUERIES[i].id === state.q) return QUERIES[i]; return QUERIES[0]; }
-  function kindIn(q, tab) { return q.script ? q.script(tab).kind : q.kind === "hole" && tab === "people" ? "clean" : q.kind; }
-  function tagText(q, kind) { return q.script ? q.script(state.tab).tag : kind === "misroute" ? q.type : kind; }
+  function kindIn(q, tab) { var pl = plan(q, tab); return pl ? pl.kind : q.kind === "hole" && tab === "people" ? "clean" : q.kind; }
+  function tagText(q, kind) { var pl = plan(q, state.tab); return pl ? pl.tag : kind === "misroute" ? q.type : kind; }
   function count(S) { return S.filter(function (x) { return x.from; }).length; }
 
   function renderPanels(S, upto) {
@@ -838,7 +994,7 @@ code { font: 12.5px var(--mono); }
     v.className = "verdict" + (kind === "misroute" ? " bad" : kind === "clean" ? "" : " gap");
     v.textContent = "";
     var h1 = document.createElement("div"), goldHole = q.gold && !deskHas(q.gold);
-    if (q.script) h1.textContent = q.script(state.tab).verdict;
+    if (plan(q, state.tab)) h1.textContent = plan(q, state.tab).verdict;
     else if (kind === "clean" && q.kind === "hole") h1.textContent = "Works here: a person's agent holds the arxiv tool, so the hole closes. " + msgs + " messages between agents.";
     else if (kind === "clean") h1.textContent = "Reaches the right agent in " + msgs + " messages.";
     else if (kind === "hole") h1.textContent = "Hole: " + q.why + (state.tab === "second" ? " Here the request goes to a person instead of a guess." : "");
@@ -850,6 +1006,8 @@ code { font: 12.5px var(--mono); }
     var s2 = document.createElement("div"); s2.className = "seen";
     s2.textContent = state.tab === "people" && msgs === 0 ? "No message leaves " + LABEL[q.asker] + ", so nothing could check it."
       : state.tab === "people" ? "No orchestrator: 0 of " + msgs + " messages pass a shared checkpoint."
+      : state.tab === "dispatch" ? "Coordinator sees " + seen + " of " + msgs + " messages: it never sees the answer."
+      : state.tab === "fanout" ? "Cost: " + msgs + " messages against " + base + " in the siloed hierarchy. Every reply passes the gather point together."
       : state.tab === "second" ? "Orchestrator sees " + seen + " of " + msgs + " messages. Cost: " + msgs + " messages against " + base + " in the siloed hierarchy."
       : "Orchestrator sees " + seen + " of " + msgs + " messages.";
     v.appendChild(h1); v.appendChild(s2);
@@ -867,8 +1025,8 @@ code { font: 12.5px var(--mono); }
       Array.prototype.forEach.call(svg.querySelectorAll(".node." + c), function (n) { n.classList.remove(c); });
     });
     var kind = kindIn(q, state.tab);
-    if (q.script) {
-      var r = q.script(state.tab);
+    if (plan(q, state.tab)) {
+      var r = plan(q, state.tab);
       r.wrong.forEach(function (id) { cls("n-" + id, "wrong"); });
       r.should.forEach(function (id) { cls("n-" + id, "should"); });
       return;
@@ -914,37 +1072,47 @@ code { font: 12.5px var(--mono); }
   }
 
   function play() {
-    var run = ++state.run, q = currentQ(), S = steps(q, state.tab), i = -1;
+    var run = ++state.run, q = currentQ(), S = steps(q, state.tab), i = 0;
     clearRun(); mark(q); renderPanels(S, -1);
+    function finish() {
+      renderPanels(S, S.length);
+      setTimeout(function () {
+        if (run !== state.run || !state.animate) return;
+        var k = 0; QUERIES.forEach(function (x, n) { if (x.id === state.q) k = n; });
+        state.q = QUERIES[(k + 1) % QUERIES.length].id; renderQueries(); play();
+      }, 5000);
+    }
     function next() {
       if (run !== state.run) return;
       Array.prototype.forEach.call(svg.querySelectorAll(".node.active"), function (n) { n.classList.remove("active"); });
-      i++;
-      if (i >= S.length) {
-        renderPanels(S, S.length);
-        setTimeout(function () {
-          if (run !== state.run || !state.animate) return;
-          var k = 0; QUERIES.forEach(function (x, n) { if (x.id === state.q) k = n; });
-          state.q = QUERIES[(k + 1) % QUERIES.length].id; renderQueries(); play();
-        }, 5000);
-        return;
-      }
-      var st = S[i];
-      renderPanels(S, i);
-      var t = trail(st);
-      if (!t) { cls("n-" + (st.toolOf || st.at), "active"); setTimeout(next, 2100); return; }
-      var len = t.path.getTotalLength(), tone = st.tone !== "ok" ? " " + st.tone : "";
-      var dot = el("circle", { r: 8, "class": "packet" + tone }, layers.top), place = floatLabel(st), lab = null;
-      if (st.tone !== "gap") t.path.setAttribute("stroke-dasharray", len + " " + len);
-      var start = null, dur = Math.max(1900, Math.min(3600, len * 6));
+      if (i >= S.length) { finish(); return; }
+      var j = i + 1;
+      if (S[i].g !== undefined) while (j < S.length && S[j].g === S[i].g) j++;
+      var batch = S.slice(i, j), moving = [], maxLen = 0;
+      i = j;
+      renderPanels(S, i - 1);
+      batch.forEach(function (st) {
+        var t = trail(st);
+        if (!t) { cls("n-" + (st.toolOf || st.at), "active"); return; }
+        var len = t.path.getTotalLength(), tone = st.tone !== "ok" ? " " + st.tone : "";
+        if (st.tone !== "gap") t.path.setAttribute("stroke-dasharray", len + " " + len);
+        moving.push({ st: st, t: t, len: len, dot: el("circle", { r: 8, "class": "packet" + tone }, layers.top), place: batch.length === 1 ? floatLabel(st) : null, lab: null });
+        maxLen = Math.max(maxLen, len);
+      });
+      if (!moving.length) { setTimeout(next, 2100); return; }
+      function clear() { moving.forEach(function (m) { m.dot.remove(); if (m.lab) m.lab.remove(); }); }
+      var start = null, dur = Math.max(1900, Math.min(3600, maxLen * 6));
       function frame(ts) {
-        if (run !== state.run) { dot.remove(); if (lab) lab.remove(); return; }
+        if (run !== state.run) { clear(); return; }
         if (start === null) start = ts;
         var k = Math.min(1, (ts - start) / dur), e = k < .5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2;
-        var pt = t.path.getPointAtLength(t.rev ? len * (1 - e) : len * e);
-        dot.setAttribute("cx", pt.x); dot.setAttribute("cy", pt.y); lab = place(pt);
-        if (st.tone !== "gap") t.path.setAttribute("stroke-dashoffset", t.rev ? -len * (1 - e) : len * (1 - e));
-        if (k < 1) requestAnimationFrame(frame); else setTimeout(function () { dot.remove(); if (lab) lab.remove(); next(); }, 650);
+        moving.forEach(function (m) {
+          var pt = m.t.path.getPointAtLength(m.t.rev ? m.len * (1 - e) : m.len * e);
+          m.dot.setAttribute("cx", pt.x); m.dot.setAttribute("cy", pt.y);
+          if (m.place) m.lab = m.place(pt);
+          if (m.st.tone !== "gap") m.t.path.setAttribute("stroke-dashoffset", m.t.rev ? -m.len * (1 - e) : m.len * (1 - e));
+        });
+        if (k < 1) requestAnimationFrame(frame); else setTimeout(function () { clear(); next(); }, 650);
       }
       requestAnimationFrame(frame);
     }
@@ -976,7 +1144,7 @@ code { font: 12.5px var(--mono); }
       b.setAttribute("aria-selected", b.dataset.tab === tab ? "true" : "false");
     });
     var n = document.getElementById("tabnote"), T = TABS[tab];
-    n.innerHTML = T.note + " <span class=\"built " + (T.built ? "yes" : "no") + "\">" + (T.built ? "runs in the repo" : "drawn, not built") + "</span>";
+    n.innerHTML = T.note + " <span class=\"built " + (T.built ? "yes" : "no") + "\">" + (T.chip || (T.built ? "runs in the repo" : "drawn, not built")) + "</span>";
     if (!fromHash) { try { history.replaceState(null, "", "#" + tab); } catch (e) { location.hash = tab; } }
     document.getElementById("tip").hidden = true;
     draw(); renderQueries(); refresh();
